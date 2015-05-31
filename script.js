@@ -4,10 +4,13 @@ $(function () {
 
 var width = 100, height = 100;
 var $canvas = null, ctx = null;
-var socket = null;
 var objects = {};
 
-var URL = "ws://45.33.103.108:443";
+var GCid = -1;
+var targetX = -1;
+var targetY = -1;
+
+var URL = "ws://45.79.218.18:443";
 
 var SIZE = 11180.339887498949;
 
@@ -32,9 +35,40 @@ function start($el) {
     console.log("Launching " + name);
   }
 
+  setInterval(function () {
+    for (var id in objects) {
+      if (objects.hasOwnProperty(id)) {
+        var o = objects[id], x = o.x, y = o.y;
+
+        var mindist = 99999999;
+        for (var i = 0; i < clients.length; ++i) {
+          var dx = clients[i].x - x,
+              dy = clients[i].y - y,
+              d = dx * dx + dy * dy;
+          if (d < mindist) {
+            mindist = d;
+          }
+        }
+
+        if (mindist > 5000) {
+          if (id == GCid) {
+            GCid = -1;
+            targetX = 0;
+            targetY = 0;
+          }
+          delete objects[id];
+        }
+      }
+    }
+  }, 1500);
+
   window.requestAnimationFrame(render);
 
-  $("#close").click(function () { socket.close(); });
+  $("#close").click(function () {
+    clients.forEach(function (c) {
+      c.end();
+    });
+  });
 }
 
 function render() {
@@ -55,6 +89,11 @@ function render() {
       ctx.arc(x, y, o.size / 5, 0, 2*Math.PI);
       ctx.stroke();
 
+      if (id == GCid) {
+        ctx.font = 'bold 20pt Calibri';
+      } else {
+        ctx.font = "12pt Sans Serif";
+      }
       ctx.fillText(o.name, x, y);
     }
   }
@@ -67,6 +106,8 @@ function AgarClient(nickname) {
 
   this.nickname = nickname;
   this.id = -1;
+  this.x = 0;
+  this.y = 0;
 
   this.socket = new WebSocket(URL);
   this.socket.binaryType = "arraybuffer";
@@ -82,10 +123,10 @@ function AgarClient(nickname) {
     self.socket.send(buf)
 
     self.sendNick();
-    setInterval(self.sendDirection.bind(self, 100, 100), 300);
+    setInterval(self.sendDirection.bind(self), 100);
   }
 
-  socket.onmessage = function (e) {
+  this.socket.onmessage = function (e) {
     var dv = new DataView(e.data);
     var pos = 1;
     switch (dv.getUint8(0)) {
@@ -97,14 +138,8 @@ function AgarClient(nickname) {
         pos += 8;
 
         if (victim == self.id) {
-          console.log("WE DIED :(");
-          objects = {};
-          setTimeout(sendNick, 500);
+          setTimeout(self.sendNick.bind(self), 500);
           return;
-        }
-
-        if (attacker == self.id) {
-          console.log("WE KILLED??");
         }
 
         delete objects[victim];
@@ -148,6 +183,20 @@ function AgarClient(nickname) {
 
           if (c == 0) { break; }
           name += String.fromCharCode(c);
+        }
+
+        if (name == "BotMaster") {
+          GCid = id;
+        }
+
+        if (id == GCid) {
+          targetX = x;
+          targetY = y;
+        }
+
+        if (id == self.id) {
+          self.x = x;
+          self.y = y;
         }
 
         if (id in objects) {
@@ -246,16 +295,16 @@ function AgarClient(nickname) {
     default:
       console.log("Unknown msg", e);
     }
-    };
+  };
 
-  socket.onclose = function (e) { };
+  this.socket.onclose = function (e) { };
 
-  socket.onerror = function(e) {
+  this.socket.onerror = function(e) {
     console.log("socket error", e);
   };
 };
 
-AgarClient.sendNick = function () {
+AgarClient.prototype.sendNick = function () {
   var buf = new ArrayBuffer(1 + 2 * this.nickname.length),
       dv = new DataView(buf);
 
@@ -267,14 +316,22 @@ AgarClient.sendNick = function () {
   this.socket.send(buf);
 }
 
-AgarClient.sendDirection = function (x, y) {
+AgarClient.prototype.sendDirection = function () {
   var buf = new ArrayBuffer(21),
       dv = new DataView(buf);
 
+  var dx = targetX - this.x;
+  var dy = targetY - this.y;
+  var angle = Math.atan2(dx, dy)
+
   dv.setUint8(0, 16);
-  dv.setFloat64(1, x, true);
-  dv.setFloat64(9, y, true);
+  dv.setFloat64(1, 1000 * Math.sin(angle), true);
+  dv.setFloat64(9, 1000 * Math.cos(angle), true);
   dv.setUint32(17, 0, true);
 
   this.socket.send(buf);
 };
+
+AgarClient.prototype.end = function () {
+  this.socket.close();
+}
