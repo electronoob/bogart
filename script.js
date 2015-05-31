@@ -6,7 +6,6 @@ var width = 100, height = 100;
 var $canvas = null, ctx = null;
 var socket = null;
 var objects = {};
-var our_id = -1;
 
 var URL = "ws://45.33.103.108:443";
 
@@ -26,7 +25,12 @@ function start($el) {
   $(window).resize(canvasResizeHandler);
   canvasResizeHandler();
 
-  startSocket();
+  var clients = [];
+  for (var i = 0; i < 10; ++i) {
+    var name = "HIHIHI" + i + Math.floor(Math.random() * 1000);
+    clients.push(new AgarClient(name));
+    console.log("Launching " + name);
+  }
 
   window.requestAnimationFrame(render);
 
@@ -62,6 +66,7 @@ function AgarClient(nickname) {
   var self = this;
 
   this.nickname = nickname;
+  this.id = -1;
 
   this.socket = new WebSocket(URL);
   this.socket.binaryType = "arraybuffer";
@@ -91,14 +96,14 @@ function AgarClient(nickname) {
         var victim = dv.getUint32(pos + 4, true);
         pos += 8;
 
-        if (victim == our_id) {
+        if (victim == self.id) {
           console.log("WE DIED :(");
           objects = {};
           setTimeout(sendNick, 500);
           return;
         }
 
-        if (attacker == our_id) {
+        if (attacker == self.id) {
           console.log("WE KILLED??");
         }
 
@@ -191,8 +196,8 @@ function AgarClient(nickname) {
       break;
 
     case 32:
-      our_id = dv.getUint32(pos, true);
-      console.log("32 - our id?", our_id);
+      self.id = dv.getUint32(pos, true);
+      console.log("32 - our id?", self.id);
       break;
 
     case 49:
