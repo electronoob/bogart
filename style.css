@@ -4,6 +4,7 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: rgb(80, 80, 80);
 }
 
 canvas {
@@ -12,8 +13,16 @@ canvas {
   left: 0;
 }
 
-button {
+button#close {
+  display: none;
   position: absolute;
   top: 0;
+  left: 0;
+  opacity: .4;
+}
+
+button#open {
+  position: absolute;
+  top: 2em;
   left: 0;
 }
