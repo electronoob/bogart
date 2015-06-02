@@ -1,13 +1,11 @@
 var width = 100, height = 100;
 var $canvas = null, ctx = null;
-var objects = {};
 
 var GCid = -1;
 
-var URL = "";
-var SIZE = 11180.339887498949;
-var NUM_BOTS = 5;
-var clients = [];
+var world = new AgarWorld();
+var NUM_BOTS = 1;
+var clients = [], spec;
 
 function canvasResizeHandler() {
   width = $(window).width();
@@ -16,25 +14,30 @@ function canvasResizeHandler() {
   $canvas[0].height = height;
 }
 
+var inter=null;
 function start() {
-  var spec = new AgarClient("spectatorbot", true);
+  window.dump("#event\tattacker_size\tvictim_size\tdistance\n");
+//  spec = new AgarClient("spectatorbot", world, true);
 
   clients = [];
   for (var i = 0; i < NUM_BOTS; ++i) {
     setTimeout(function () {
       var name = "BOT.." + + Math.floor(Math.random() * 1000);
-      clients.push(new AgarClient(name));
+      clients.push(new AgarClient(name, world));
       console.log("Launching " + name);
     }, i * 1500);
   }
 
-  setInterval(function () {
+  if (inter != null) {clearInterval(inter);}
+
+  inter = setInterval(function () {
     var vecs = [];
     for (var i = 0; i < clients.length; ++i) {
       vecs[i] = [0, 0];
       clients[i].vecs = [];
     }
 
+    var objects = world.objects;
     for (var id in objects) {
       if (objects.hasOwnProperty(id)) {
         var o = objects[id], x = o.x, y = o.y, size = o.size;
@@ -58,6 +61,13 @@ function start() {
                 cost = Math.max(0, 200 - d);
               }
 
+              if (!o.isVirus && o.size > c.size) {
+                dir = 1;
+                cost = (d - o.size);
+                if (cost <= 0) { cost = 0.00000001; }
+                cost = 1/cost;
+              }
+
               if (id == GCid) {
                 dir = -1;
                 cost = 9999999999;
@@ -67,15 +77,14 @@ function start() {
                 dir = -1;
                 if (d < 250) {
                   cost *= 250 - d;
-                } else {
-                  cost = 0;
                 }
               }
 
-              c.vecs.push([dx*cost*dir, dy*cost*dir]);
-
-              vecs[i][0] += dir * cost * dx / (d*d);
-              vecs[i][1] += dir * cost * dy / (d*d);
+              var v = [dir * cost * dx / (d*d),
+                       dir * cost * dy / (d*d)];
+              vecs[i][0] += v[0];
+              vecs[i][1] += v[1];
+              c.vecs.push(v);
             }
           }
         }
@@ -86,51 +95,62 @@ function start() {
       var c = clients[i];
       if (c.id != -1) {
         var norm = Math.sqrt(vecs[i][0] * vecs[i][0] + vecs[i][1] * vecs[i][1]);
+        if (norm == 0) {
+          norm = 1;
+        }
         var x = (vecs[i][0]/norm) * 10000;
-        var y = (vecs[i][0]/norm) * 10000;
+        var y = (vecs[i][1]/norm) * 10000;
 
-        if (c.x < (c.size / 2)) {
+        if (x < 0 && c.x < c.size) {
+          y = 0;
+          y = Math.sign(y) * 10000;
+        }
+
+        if (x > 0 && c.x > world.width - c.size) {
           x = 0;
           y = Math.sign(y) * 10000;
         }
 
-        if (c.x > SIZE - (c.size / 2)) {
-          x = 0;
-          y = Math.sign(y) * 10000;
-        }
-
-        if (c.y < (c.size / 2)) {
+        if (y < 0 && c.y < c.size) {
           y = 0;
           x = Math.sign(x) * 10000;
         }
 
-        if (c.y > SIZE - (c.size / 2)) {
+        if (y > 0 && c.y > world.height - c.size) {
           y = 0;
           x = Math.sign(x) * 10000;
         }
 
-        if (y == 0 && x == 0) {
-          y = 0;
-          x = 0;
-        }
+//        console.log("Client", i, "towards", x, y);
 
         clients[i].dx = x;
         clients[i].dy = y;
         clients[i].sendDirection();
       }
     }
-  }, 100);
+  }, 50);
+}
+
+function drawArrow(ctx, x, y, dx, dy) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x+dx, y+dy);
+  ctx.stroke();
 }
 
 function render() {
   ctx.clearRect(0, 0, width, height);
 
+  var scale_x = width / world.width;
+  var scale_y = height / world.height;
+
+  var objects = world.objects;
   for (var id in objects) {
     if (objects.hasOwnProperty(id)) {
       var o = objects[id];
 
-      var x = width * o.x / SIZE;
-      var y = height * o.y / SIZE;
+      var x = o.x * scale_x;
+      var y = o.y * scale_y;
 
       if (o.isVirus) {
         ctx.setLineDash([5,5]);
@@ -141,7 +161,7 @@ function render() {
       ctx.strokeStyle = o.color;
 
       ctx.beginPath();
-      ctx.arc(x, y, o.size / 7, 0, 2*Math.PI);
+      ctx.arc(x, y, o.size * (width / world.width), 0, 2*Math.PI);
       ctx.stroke();
 
       if (o.isAgitated) {
@@ -176,232 +196,20 @@ function render() {
     }
   }
 
+  for (var i=0; i < clients.length; ++i) {
+    var c = clients[i],
+        x = c.x * scale_x,
+        y = c.y * scale_y;
+    if (c.hasOwnProperty("vecs")) {
+      c.vecs.forEach(function (vec) {
+//        console.log(vec[0], vec[1]);
+        drawArrow(ctx, x, y, vec[0], vec[1]);
+      });
+    }
+  }
+
   window.requestAnimationFrame(render);
 }
-
-function AgarClient(nickname, spectate) {
-  var self = this;
-
-  this.reset = function() {
-    this.nickname = nickname;
-    this.id = -1;
-    this.x = -1;
-    this.y = -1;
-    this.size = -1;
-    this.dx = 0;
-    this.dy = 0;
-  }
-  this.reset();
-
-  this.socket = new WebSocket(URL);
-  this.socket.binaryType = "arraybuffer";
-  this.socket.onopen = function (e) {
-    var buf = new ArrayBuffer(5);
-    var dv = new DVWriter(new DataView(buf), true);
-    dv.putUint8(254);
-    dv.putUint32(4);
-    self.socket.send(buf);
-
-    dv.move(0);
-    dv.putUint8(255);
-    dv.putUint32(1);
-    self.socket.send(buf)
-
-    if (spectate) {
-      self.sendCommand(1);
-    } else {
-      self.sendNick();
-      self.sendDirection();
-    }
-  }
-
-  this.socket.onmessage = function (e) {
-    var dv = new DVReader(new DataView(e.data), true);
-    switch (dv.getUint8(0)) {
-    case 16:
-      var cnt = dv.getUint16();
-      for (var i = 0; i < cnt; ++i) {
-        var attacker = dv.getUint32(), victim = dv.getUint32();
-
-        if (victim == self.id) {
-          self.reset();
-          setTimeout(self.sendNick.bind(self), 500);
-        }
-
-        if (victim == GCid) {
-          GCid = -1;
-        }
-
-        delete objects[victim];
-      }
-
-      while (1) {
-        var id = dv.getUint32();
-        if (id == 0) break;
-
-        var x = dv.getInt16(),
-            y = dv.getInt16(),
-            size = dv.getInt16(),
-            r = dv.getUint8(),
-            g = dv.getUint8(),
-            b = dv.getUint8(),
-            flags = dv.getUint8();
-
-        var color = (r << 16 | g << 8 | b).toString(16);
-        while (color.length < 6) { color = "0" + color; }
-        color = "#" + color;
-
-        var isVirus = !!(flags & 1);
-        var isAgitated = !!(flags & 16);
-
-        if (flags & 2) { dv.skip(4); }
-        if (flags & 4) { dv.skip(8); }
-        if (flags & 8) { dv.skip(16); }
-
-        var name = dv.getNullString16();
-
-        if (name == "BotMaster") {
-          GCid = id;
-        }
-
-        if (id == self.id) {
-          self.x = x;
-          self.y = y;
-          self.size = size;
-        }
-
-        if (id in objects) {
-          var o = objects[id];
-          o.x = x;
-          o.y = y;
-          o.size = size;
-          o.isAgitated = isAgitated;
-          o.color = color;
-          o.isBot = o.isBot || (id == self.id);
-        } else {
-          objects[id] = {
-            color: color,
-            name: name,
-            x: x,
-            y: y,
-            size: size,
-            isVirus: isVirus,
-            isAgitated: isAgitated,
-            isBot: id == self.id
-          };
-        }
-      }
-
-      cnt = dv.getUint32();
-      for (i = 0; i < cnt; i++) {
-        var killid = dv.getUint32();
-
-        if (killid in objects) {
-          if (killid == GCid) { GCid = -1; }
-          delete objects[killid];
-        }
-      }
-      break;
-
-    case 17:
-      // Unknown, 3 values
-      // Indicates camera movement + zoom level
-      var x = dv.getFloat32(),
-          y = dv.getFloat32(),
-          z = dv.getFloat32();
-      // console.log(17, x, y, z);
-      break;
-
-    case 20:
-      // Unknown - resets stuff?
-      console.log("reset?");
-      break;
-
-    case 32:
-      // We spawned
-      self.id = dv.getUint32();
-      break;
-
-    case 49:
-      // Leaderboard ids and names
-      var cnt = dv.getUint32();
-      for (var i = 0; i < cnt; ++i) {
-        var id = dv.getUint32(),
-            name = dv.getNullString16();
-      }
-      break;
-
-    case 50:
-      // unknown
-      var cnt = dv.getUint32();
-      for (var i = 0; i < cnt; ++i) {
-        var n = dv.getFloat32();
-      }
-      console.log("vals", cnt);
-      break;
-
-    case 64:
-      // Set stage size
-      var x = dv.getFloat64(),
-          y = dv.getFloat64(),
-          w = dv.getFloat64(),
-          h = dv.getFloat64();
-      console.log(64, x, y, w, h);
-      break;
-
-    case 72:
-      // Server sent HelloHelloHello initialization message
-      break;
-
-    default:
-      console.log("Unknown msg", e);
-    }
-  };
-
-  this.socket.onclose = function (e) {
-    self.reset();
-  };
-
-  this.socket.onerror = function(e) {
-    self.reset();
-    console.log("socket error", e);
-  };
-};
-
-AgarClient.prototype.sendNick = function () {
-  var buf = new ArrayBuffer(1 + 2 * this.nickname.length),
-      dv = new DVWriter(new DataView(buf), true);
-
-  dv.putUint8(0);
-  dv.putNullString16(this.nickname);
-
-  this.socket.send(buf);
-};
-
-AgarClient.prototype.sendDirection = function () {
-  var buf = new ArrayBuffer(21),
-      dv = new DVWriter(new DataView(buf), true);
-
-  dv.putUint8(16);
-  dv.putFloat64(this.dx, true);
-  dv.putFloat64(this.dy, true);
-  dv.putUint32(0, true);
-
-  this.socket.send(buf);
-};
-
-AgarClient.prototype.sendCommand = function (x) {
-  var buf = new ArrayBuffer(1),
-      dv = new DVWriter(new DataView(buf), true);
-
-  dv.putUint8(x);
-
-  this.socket.send(buf);
-};
-
-AgarClient.prototype.end = function () {
-  this.socket.close();
-};
 
 if (typeof window !== "undefined") {
   $(function () {
@@ -413,7 +221,7 @@ if (typeof window !== "undefined") {
     window.requestAnimationFrame(render);
 
     $("#open").click(function () {
-      URL = $("#url").val();
+      world.url = $("#url").val();
       $("#url").hide();
       $("#open").hide();
       $("#close").show();
@@ -424,6 +232,13 @@ if (typeof window !== "undefined") {
       clients.forEach(function (c) {
         c.end();
       });
+//      spec.end();
+
+      $("#url").show();
+      $("#open").show();
+      $("#close").hide();
+      world.objects = {};
+      names = {};
     });
   });
 } else {

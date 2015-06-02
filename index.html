@@ -5,13 +5,21 @@
     <title>Agar bots</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+        <script type="text/javascript">
+      // fill in for node js style modules
+      module={};
+      exports=module.exports={};
+    </script>
+    <script type="text/javascript" src="node_modules/victor/index.js"></script>
     <script type="text/javascript" src="dvreader.js"></script>
+    <script type="text/javascript" src="world.js"></script>
+    <script type="text/javascript" src="bot.js"></script>
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
     <canvas id="canvas" width="100" height="100"></canvas>
     <button id="close">close</button>
-    <input type="text" id="url" value="" />
+    <input type="text" id="url" value="ws://127.0.0.1:443" />
     <button id="open">open</button>
   </body>
 </html>
