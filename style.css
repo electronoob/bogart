@@ -26,3 +26,12 @@ button#open {
   top: 2em;
   left: 0;
 }
+
+#leaderboard {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0);
+  color: white;
+  top:0;
+  right: 0;
+  opacity: 0.5;
+}

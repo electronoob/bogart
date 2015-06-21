@@ -3,16 +3,35 @@ function AgarWorld(url) {
   this.width = 1;
   this.height = 1;
   this.objects = {};
+  this.leaders = [];
 };
 
-AgarWorld.prototype.addObject = function (obj) {
+AgarWorld.prototype.insertObject = function (obj) {
+  if (id in this.objects) {
+    this.objects[id]++;
+  }
+};
+
+AgarWorld.prototype.removeId = function (id) {
+  if (id in objects) {
+    delete objects[id];
+  }
+};
+
+AgarWorld.prototype.releaseId = function (id) {
+  if (id in objects) {
+    objects[id].viewers--;
+  }
+};
+
+AgarWorld.prototype.removeId = function (id) {
 
 };
 
-AgarWorld.prototype.removeObject = function (id) {
+AgarWorld.prototype.setLeaders = function (new_leaders) {
+  this.leaders = new_leaders;
 
-};
-
-AgarWorld.prototype.cantSeeObject = function (id) {
-
+  if (this.onleaderschange) {
+    this.onleaderschange(this.leaders);
+  }
 };

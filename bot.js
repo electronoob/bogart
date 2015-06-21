@@ -1,6 +1,4 @@
 var names = {};
-var printed_leaders = false;
-setInterval(function () { printed_leaders = false; }, 10000);
 
 function AgarClient(nickname, world, spectate) {
   var self = this;
@@ -16,7 +14,7 @@ function AgarClient(nickname, world, spectate) {
     this.size = -1;
     this.dx = 0;
     this.dy = 0;
-  }
+  };
   this.reset();
 
   this.socket = new WebSocket(world.url);
@@ -47,7 +45,7 @@ AgarClient.prototype.sendInit = function () {
   dv.move(0);
   dv.putUint8(255);
   dv.putUint32(1);
-  this.socket.send(buf)
+  this.socket.send(buf);
 
   if (this.spectate) {
     this.sendCommand(1);
@@ -93,21 +91,36 @@ AgarClient.prototype.end = function () {
 };
 
 AgarClient.prototype.handleMessage = function (e) {
-  objects = world.objects;
-  var dv = new DVReader(new DataView(e.data), true);
-  switch (dv.getUint8(0)) {
+  var dv = new DVReader(new DataView(e.data), true),
+      t = window.performance.now(),
+      objects = world.objects;
+
+  var opcode = dv.getUint8();
+  if (opcode == 240) { // No clue, but this matches the client
+    var unknownSkip = dv.getUint32();
+    opcode = dv.getUint8();
+    console.log("unknown 240 value", unknownSkip, opcode, e.data.byteLength);
+  }
+
+  switch (opcode) {
   case 16:
     var cnt = dv.getUint16();
     for (var i = 0; i < cnt; ++i) {
       var attacker_id = dv.getUint32(), victim_id = dv.getUint32();
 
-      if (attacker_id in objects && victim_id in objects) {
-        var attacker = objects[attacker_id],
-            victim = objects[victim_id];
-        var pos_a = Victor.fromObject(attacker),
-            pos_v = Victor.fromObject(victim);
-        window.dump("eat\t"+attacker.size+"\t"+victim.size+
-                    "\t"+pos_a.distance(pos_v)+"\n");
+      if (attacker_id in objects) {
+        var attacker = objects[attacker_id];
+//        window.dump("eat\t"+attacker.size+"\t"+victim.size+
+        //                    "\t"+pos_a.distance(pos_v)+"\n");
+        attacker.lastEatTime = t;
+        attacker.hasntEatenSinceLastDecay = false;
+        attacker.prevEatSize = attacker.size;
+      }
+
+      if (attacker_id in objects) {
+        attacker = objects[attacker_id];
+        attacker.lastEatTime = t;
+        attacker.hasntEatenSinceLastDecay = false;
       }
 
       if (victim_id == this.id) {
@@ -151,38 +164,78 @@ AgarClient.prototype.handleMessage = function (e) {
 
       var name = dv.getNullString16();
 
-      if (name == "NotReallyABot") {
-        GCid = id;
-      }
-
       if (name !== "") {
         names[id] = name;
       }
 
+      var o;
       if (id in objects) {
-        var o = objects[id];
-        o.x = x;
-        o.y = y;
-        o.size = size;
-        o.isAgitated = isAgitated;
-        o.color = color;
-        o.isBot = o.isBot || (id == this.id);
+        o = objects[id];
+
+        // detect movement without gain in size and only do it on
+        // ourselves to keep the data free of split events
+//         if (o.size == size && (t - o.lastUpdate) < 500 && id == this.id) {
+//           window.dump("" + size + "\t" +
+//                       (Victor.fromObject(o).distance(new Victor(x, y)))
+//                       + "\t" + (t - o.lastUpdate) + "\n");
+//        }
         if (id in names) {
           o.name = names[id];
         }
       } else {
-        //          console.log("New", x, y, size, name);
         objects[id] = {
-          color: color,
           name: name,
-          x: x,
-          y: y,
-          size: size,
-          isVirus: isVirus,
-          isAgitated: isAgitated,
-          isBot: id == this.id
+          lastEatTime: 0,
+          lastDecayTime: 0,
+          hasntEatenSinceLastDecay: false,
+          prevDecaySize: 0,
+          prevEatSize: 0,
+          prevDecayPoint: null
         };
       }
+
+      o = objects[id];
+
+      // This blob got smaller: gotta be either decay or a split--I
+      // want the split data to and I'll filter out large losses of
+      // half at a time in post
+      if (size < o.size) {
+        var decayPoint = new Victor(x, y);
+
+        if (o.prevDecayPoint !== null) {
+          window.dump(
+            (t-o.lastDecayTime) + "\t" +
+              (t-o.lastEatTime) + "\t" +
+              o.size + "\t" +
+              size + "\t" +
+              o.prevDecaySize + "\t" +
+              o.prevEatSize + "\t" +
+              o.hasntEatenSinceLastDecay.toString().toUpperCase() + "\t" +
+              (decayPoint.distance(o.prevDecayPoint)) + "\n"
+          );
+        }
+
+        o.lastDecayTime = t;
+        o.hasntEatenSinceLastDecay = true;
+        o.prevDecaySize = size;
+        o.prevDecayPoint = new Victor(x, y);
+      }
+
+      o.isBot = o.isBot || (id == this.id);
+      o.x = x;
+      o.y = y;
+      o.size = size;
+      o.isVirus = isVirus;
+      o.isAgitated = isAgitated;
+      o.color = color;
+
+      if (name !== "") {
+        o.feed_target = FEED_TARGETS.some(function (n) {
+          return name.toLowerCase() === n;
+        });
+      }
+
+      o.lastUpdate = t;
 
       if (id == this.id) {
         this.x = x;
@@ -195,8 +248,6 @@ AgarClient.prototype.handleMessage = function (e) {
     cnt = dv.getUint32();
     for (i = 0; i < cnt; i++) {
       var killid = dv.getUint32();
-
-      //        console.log("Remove", killid);
       if (killid in objects) {
         if (killid == GCid) { GCid = -1; }
         delete objects[killid];
@@ -205,12 +256,10 @@ AgarClient.prototype.handleMessage = function (e) {
     break;
 
   case 17:
-    // Unknown, 3 values
     // Indicates camera movement + zoom level
     var x = dv.getFloat32(),
     y = dv.getFloat32(),
     z = dv.getFloat32();
-    //      console.log(17, x, y, z);
     break;
 
   case 20:
@@ -220,24 +269,26 @@ AgarClient.prototype.handleMessage = function (e) {
 
   case 21:
     console.log("mysterious 21", dv.getInt16(), dv.getInt16());
-    break
+    break;
 
   case 32:
-    // We spawned
+    // New object under our control... but I don't handle controlling
+    // multiple blobs yet
     this.id = dv.getUint32();
     break;
 
   case 49:
     // Leaderboard ids and names
-    var cnt = dv.getUint32();
+    var cnt = dv.getUint32(),
+        leaders = [];
     for (var i = 0; i < cnt; ++i) {
-      var id = dv.getUint32(),
-          name = dv.getNullString16();
-      if (!printed_leaders) {
-        console.log(i, id, name);
-      }
+      var id = dv.getUint32(), name = dv.getNullString16();
+      leaders.push({
+        id: id,
+        name: name
+      });
     }
-    printed_leaders = true;
+    this.world.setLeaders(leaders);
     break;
 
   case 50:
@@ -252,9 +303,9 @@ AgarClient.prototype.handleMessage = function (e) {
   case 64:
     // Set stage size
     var x = dv.getFloat64(),
-    y = dv.getFloat64(),
-    w = dv.getFloat64(),
-    h = dv.getFloat64();
+        y = dv.getFloat64(),
+        w = dv.getFloat64(),
+        h = dv.getFloat64();
     this.world.width = w;
     this.world.height = h;
     console.log("World dimensions [64]", x, y, w, h);

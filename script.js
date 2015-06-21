@@ -1,11 +1,28 @@
 var width = 100, height = 100;
-var $canvas = null, ctx = null;
+var $canvas = null, ctx = null,
+    $leaderboard = null;
 
 var GCid = -1;
 
 var world = new AgarWorld();
 var NUM_BOTS = 1;
-var clients = [], spec;
+var clients = [], spec = null;
+
+var FEED_TARGETS = ["gc", "BotMaster", "white light", "white  light",
+                    "tubbymcfatfuck", "texas  doge", "white  light",
+                    "doge  helper", "lord kience", "drunken",
+                    "controless", "notreallyabot",
+                    "sqochit", "blueeyes",
+                    "skref is life", "shrek is love"];
+
+world.onleaderschange = function (new_leaders) {
+  if ($leaderboard) {
+    $leaderboard.html("");
+    new_leaders.forEach(function (leader) {
+      $leaderboard.append("<li>" + leader.name + "</li>");
+    });
+  }
+};
 
 function canvasResizeHandler() {
   width = $(window).width();
@@ -16,9 +33,9 @@ function canvasResizeHandler() {
 
 var inter=null;
 function start() {
-  window.dump("#event\tattacker_size\tvictim_size\tdistance\n");
-//  spec = new AgarClient("spectatorbot", world, true);
-
+  window.dump("decay_time\teat_time\told_size\tnew_size\tprev_decay_size\tprev_eat_size\tgood_decay\tdist_moved\n");
+  spec = new AgarClient("spectatorbot", world, true);
+  /*
   clients = [];
   for (var i = 0; i < NUM_BOTS; ++i) {
     setTimeout(function () {
@@ -45,7 +62,7 @@ function start() {
 
         for (var i = 0; i < clients.length; ++i) {
           var c = clients[i];
-          if (c.id > -1) {
+          if (c.id > -1 && id != c.id) {
             var dx = c.x - x, dy = c.y - y;
 
             if (Math.abs(dx) < 10000 && Math.abs(dy) < 10000) {
@@ -56,23 +73,34 @@ function start() {
               var dir = (c.size < o.size || o.isVirus)? 1 : -1;
               var cost = Math.abs(c.size - o.size);
 
-              if (o.isVirus && c.size > 80) {
+              if (o.size > c.size * 0.85 && c.size > o.size * 0.85) {
+                // another blob that we can't eat and it can't eat us
+                cost = 0;
+              } else if (o.size * 0.85 > c.size) {
+                // another blob large enough to hurt us (including
+                // viruses)
+                //
                 dir = 1;
-                cost = Math.max(0, 200 - d);
+
+                // can they split kill us? virtually reduce the distance
+                var effective_d = d;
+                if ((o.size / 2) * 0.85 > c.size) {
+                  effective_d = Math.max(0, d-660);
+                }
+
+                cost = (effective_d - o.size)/o.size;
+                if (cost <= 0) { cost = 0.0000001; }
+                cost = Math.pow(1/cost, 2);
               }
 
-              if (!o.isVirus && o.size > c.size) {
-                dir = 1;
-                cost = (d - o.size);
-                if (cost <= 0) { cost = 0.00000001; }
-                cost = 1/cost;
-              }
-
-              if (id == GCid) {
+              // Bots should join together, or sacrifice themselves
+              // for their human masters!
+              if (o.feed_target || o.isBot) {
                 dir = -1;
-                cost = 9999999999;
+                cost = 999999999;
               }
 
+              // Food pellets
               if (o.size < 14) {
                 dir = -1;
                 if (d < 250) {
@@ -121,14 +149,13 @@ function start() {
           x = Math.sign(x) * 10000;
         }
 
-//        console.log("Client", i, "towards", x, y);
-
         clients[i].dx = x;
         clients[i].dy = y;
         clients[i].sendDirection();
       }
     }
   }, 50);
+*/
 }
 
 function drawArrow(ctx, x, y, dx, dy) {
@@ -143,6 +170,9 @@ function render() {
 
   var scale_x = width / world.width;
   var scale_y = height / world.height;
+
+  var d;
+  var t = window.performance.now();
 
   var objects = world.objects;
   for (var id in objects) {
@@ -192,6 +222,16 @@ function render() {
         ctx.font = "6pt Sans Serif";
         size = ctx.measureText("" + o.size);
         ctx.fillText(""+o.size, x-(size.width / 2), y+6);
+
+        d = (t - o.lastEatTime).toFixed(2);
+        size = ctx.measureText(d);
+        ctx.fillText(d, x-(size.width / 2), y+12);
+      }
+
+      if (o.feed_target) {
+        ctx.font = "20pt Sans Serif";
+        size = ctx.measureText("FEED");
+        ctx.fillText("FEED", x-(size.width / 2), y+12);
       }
     }
   }
@@ -202,7 +242,6 @@ function render() {
         y = c.y * scale_y;
     if (c.hasOwnProperty("vecs")) {
       c.vecs.forEach(function (vec) {
-//        console.log(vec[0], vec[1]);
         drawArrow(ctx, x, y, vec[0], vec[1]);
       });
     }
@@ -218,6 +257,8 @@ if (typeof window !== "undefined") {
     $(window).resize(canvasResizeHandler);
     canvasResizeHandler();
 
+    $leaderboard = $("#leaderboard");
+
     window.requestAnimationFrame(render);
 
     $("#open").click(function () {
@@ -232,7 +273,11 @@ if (typeof window !== "undefined") {
       clients.forEach(function (c) {
         c.end();
       });
-//      spec.end();
+
+      if (spec !== null) {
+        spec.end();
+        spec = false;
+      }
 
       $("#url").show();
       $("#open").show();
