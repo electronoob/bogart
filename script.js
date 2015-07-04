@@ -9,6 +9,7 @@ var NUM_BOTS = 1;
 var clients = [], spec = null;
 
 var offsetX = 0, offsetY = 0;
+var scale_x = .5, scale_y = .5;
 
 var FEED_TARGETS = ["gc", "BotMaster", "white light", "white  light",
                     "tubbymcfatfuck", "texas  doge", "white  light",
@@ -39,9 +40,16 @@ function start() {
   spec = new AgarClient("spectatorbot", world, false);
 
   window.onmousemove=function(e){
-    window.spec.dx = e.clientX - offsetX;
-    window.spec.dy = e.clientY - offsetY;
+    window.spec.dx = (e.clientX / scale_x) - offsetX;
+    window.spec.dy = (e.clientY / scale_y) - offsetY;
     //console.log(spec.dx+ " : " + spec.dy);
+  };
+  // Zoom
+  window.onmousewheel=function(e){
+      var d = e.wheelDelta/2000;
+      scale_x += d;
+      scale_y += d; 
+      console.log(d);
   };
   /*
   clients = [];
@@ -177,10 +185,9 @@ function render() {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  var scale_x = width / world.width;
-  var scale_y = height / world.height;
-  scale_x = 1; // temp
-  scale_y = 1;
+  //var scale_x = width / world.width;
+  //var scale_y = height / world.height;
+  ctx.scale(scale_x,scale_y);
 
   var d;
   var t = window.performance.now();
@@ -189,8 +196,8 @@ function render() {
   //console.log(spec.x + " : " + spec.y);
   //console.log(offsetX+ " : " + offsetY);
   if (spec) {
-    offsetX = (width/2) - spec.x; 
-    offsetY = (height/2) - spec.y;
+    offsetX = ((width/2) / scale_x) - spec.x; 
+    offsetY = ((height/2) / scale_y) - spec.y;
     console.log(offsetX+ " : " + offsetY);
     //ctx.translate(offsetX,offsetY);
     ctx.translate(offsetX,offsetY);
@@ -201,8 +208,8 @@ function render() {
     if (objects.hasOwnProperty(id)) {
       var o = objects[id];
 
-      var x = o.x * scale_x;
-      var y = o.y * scale_y;
+      var x = o.x;
+      var y = o.y;
 
       if (o.isVirus) {
         ctx.setLineDash([5,5]);
@@ -260,8 +267,8 @@ function render() {
 
   for (var i=0; i < clients.length; ++i) {
     var c = clients[i],
-        x = c.x * scale_x,
-        y = c.y * scale_y;
+        x = c.x,
+        y = c.y;
     if (c.hasOwnProperty("vecs")) {
       c.vecs.forEach(function (vec) {
         drawArrow(ctx, x, y, vec[0], vec[1]);
