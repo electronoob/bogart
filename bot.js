@@ -66,6 +66,7 @@ AgarClient.prototype.sendNick = function () {
 };
 
 AgarClient.prototype.sendDirection = function () {
+  console.log(this.dx+ " : " + this.dy);
   var buf = new ArrayBuffer(21),
       dv = new DVWriter(new DataView(buf), true);
 

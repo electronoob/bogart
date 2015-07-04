@@ -33,8 +33,14 @@ function canvasResizeHandler() {
 
 var inter=null;
 function start() {
-  window.dump("decay_time\teat_time\told_size\tnew_size\tprev_decay_size\tprev_eat_size\tgood_decay\tdist_moved\n");
-  spec = new AgarClient("spectatorbot", world, true);
+  //window.dump("decay_time\teat_time\told_size\tnew_size\tprev_decay_size\tprev_eat_size\tgood_decay\tdist_moved\n");
+  spec = new AgarClient("spectatorbot", world, false);
+
+  window.onmousemove=function(e){
+    window.spec.dx = e.clientX;
+    window.spec.dy = e.clientY;
+    //console.log(spec.dx+ " : " + spec.dy);
+  };
   /*
   clients = [];
   for (var i = 0; i < NUM_BOTS; ++i) {
@@ -155,7 +161,7 @@ function start() {
       }
     }
   }, 50);
-*/
+ */
 }
 
 function drawArrow(ctx, x, y, dx, dy) {
@@ -248,6 +254,9 @@ function render() {
   }
 
   window.requestAnimationFrame(render);
+
+  // hi
+  spec.sendDirection();
 }
 
 if (typeof window !== "undefined") {
