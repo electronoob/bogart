@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>wow gotta love using jsfiddle so handy.</title>
+  
+  <style type='text/css'>
+    
+  </style>
+  
+
+
+<script type='text/javascript'>//<![CDATA[ 
+window.onload=function(){
+var x = 0.0;
+var mX = 0;
+var mY = 0;
+var scale = 200;
+var sineoffset =0.00;
+
+
+var canvas = document.getElementById('canvas');
+var screenContext = canvas.getContext('2d');
+var player = document.createElement("canvas");
+var playerContext = player.getContext('2d');
+player.setAttribute('width', 150);
+player.setAttribute('height', 150);
+
+var imageObj = new Image();
+imageObj.onload = function () {
+    playerContext.save();
+    playerContext.beginPath();
+    playerContext.moveTo(0, 0);
+    playerContext.arc(60, 60, 50, 0, 2 * Math.PI);
+    playerContext.clip();
+    playerContext.globalAlpha = 1;
+    playerContext.drawImage(imageObj, 0, 0, 110,110);
+    playerContext.restore();
+
+    playerContext.font = "12px verdana";
+    var nameLen = playerContext.measureText('electroboob').width;
+
+  
+    playerContext.lineWidth = 2;
+    playerContext.strokeStyle = 'rgba(255,255,255,0.8)';
+    playerContext.strokeText("electroboob", 60 - (nameLen / 2) + 1,80);
+
+    
+    playerContext.fillStyle = 'rgba(0,0,0,1)';
+    playerContext.fillText("electroboob", 60 - (nameLen / 2), 80);
+    
+    
+    playerContext.strokeStyle = 'rgba(50,50,255,1)';
+    playerContext.lineWidth = 2;
+    playerContext.beginPath();
+    playerContext.arc(60,60, 50, 0, Math.PI * 2, false);
+    playerContext.stroke();
+    //ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    playerContext.strokeStyle = 'rgba(0,153,255,0.4)';
+    playerContext.lineWidth = 4;
+    playerContext.beginPath();
+    playerContext.arc(60, 60, 55, 0, Math.PI * 2, false);
+    playerContext.stroke();
+      
+};
+
+
+function init() {
+    imageObj.src = 'http://connect.agariomods.com/img_tits.png';
+
+    window.requestAnimationFrame(draw);
+    document.getElementById('canvas').addEventListener('mousemove', function (evt) {
+        var mousePos = getMousePos(canvas, evt);
+        mX = mousePos.x;
+        mY = mousePos.y;
+    }, false);
+}
+
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+
+function draw() {
+    //sineoffset += 1.0;
+    //scale=(Math.sin(sineoffset) * 20)+200;
+    //if (scale<50) scale=50;
+    //if (scale>500) scale=500;
+    var ctx = document.getElementById('canvas').getContext('2d');
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.clearRect(0, 0, 1024, 768);
+    ctx.drawImage(player, mX -(scale/2)+20, mY -(scale/2)+20, scale,scale);
+
+    window.requestAnimationFrame(draw);
+}
+
+init();
+}//]]>  
+
+</script>
+
+
+</head>
+<body>
+  <canvas width="1024" height="768" id="canvas" style="background-color: #000000;"></canvas>
+  
+</body>
+
+
+</html>
+
