@@ -8,6 +8,8 @@ var world = new AgarWorld();
 var NUM_BOTS = 1;
 var clients = [], spec = null;
 
+var offsetX = 0, offsetY = 0;
+
 var FEED_TARGETS = ["gc", "BotMaster", "white light", "white  light",
                     "tubbymcfatfuck", "texas  doge", "white  light",
                     "doge  helper", "lord kience", "drunken",
@@ -37,8 +39,8 @@ function start() {
   spec = new AgarClient("spectatorbot", world, false);
 
   window.onmousemove=function(e){
-    window.spec.dx = e.clientX;
-    window.spec.dy = e.clientY;
+    window.spec.dx = e.clientX - offsetX;
+    window.spec.dy = e.clientY - offsetY;
     //console.log(spec.dx+ " : " + spec.dy);
   };
   /*
@@ -172,13 +174,27 @@ function drawArrow(ctx, x, y, dx, dy) {
 }
 
 function render() {
+  ctx.save();
   ctx.clearRect(0, 0, width, height);
 
   var scale_x = width / world.width;
   var scale_y = height / world.height;
+  scale_x = 1; // temp
+  scale_y = 1;
 
   var d;
   var t = window.performance.now();
+
+  // Translate
+  //console.log(spec.x + " : " + spec.y);
+  //console.log(offsetX+ " : " + offsetY);
+  if (spec) {
+    offsetX = (width/2) - spec.x; 
+    offsetY = (height/2) - spec.y;
+    console.log(offsetX+ " : " + offsetY);
+    //ctx.translate(offsetX,offsetY);
+    ctx.translate(offsetX,offsetY);
+  }
 
   var objects = world.objects;
   for (var id in objects) {
@@ -252,11 +268,17 @@ function render() {
       });
     }
   }
-
+  
   window.requestAnimationFrame(render);
 
-  // hi
-  spec.sendDirection();
+  // Move this to a function 
+  try {
+    spec.sendDirection();
+  } catch (e) {
+    // websocket not open
+  }
+  ctx.restore();
+  
 }
 
 if (typeof window !== "undefined") {
