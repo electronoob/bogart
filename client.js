@@ -118,6 +118,11 @@ AgarClient.prototype.handleMessage = function (e) {
         attacker.prevEatSize = attacker.size;
       }
 
+      var index = this.myCells.indexOf(victim_id);
+      if (index != -1) {
+        delete this.myCells[index];
+      }
+
       delete objects[victim_id];
     }
 
@@ -227,9 +232,12 @@ AgarClient.prototype.handleMessage = function (e) {
         cx += objects[j].x;
         cy += objects[j].y;
         count++;
-      } else {
+      } 
+      /*
+      else {
         delete this.myCells[i];
       }
+      */
     }
     if (count != 0) {
       this.x = cx/count;

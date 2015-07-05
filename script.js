@@ -56,6 +56,9 @@ function start() {
       case 113: // Q
         spec.sendCommand(18);
         break;
+      case 114: // R = respawn
+        spec.sendNick();
+        break;
     }
   }
   // Zoom
@@ -234,21 +237,17 @@ function render() {
       ctx.strokeStyle = o.color;
 
       ctx.beginPath();
-      ctx.arc(x, y, o.size * (width / world.width), 0, 2*Math.PI);
+      ctx.arc(x, y, o.size, 0, 2*Math.PI);
       ctx.stroke();
 
       if (o.isAgitated) {
         ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
         ctx.fill();
-      }
-
-      if (id == GCid) {
-        ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-        ctx.fill();
-      }
-
-      if (o.isBot) {
+      } else if (o.isBot) {
         ctx.fillStyle = "rgba(0, 0, 255, 0.3)";
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
         ctx.fill();
       }
 
@@ -299,7 +298,6 @@ function render() {
     // websocket not open
   }
   ctx.restore();
-  
 }
 
 if (typeof window !== "undefined") {
