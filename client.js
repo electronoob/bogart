@@ -9,11 +9,12 @@ function AgarClient(nickname, world, spectate) {
 
   this.reset = function() {
     this.id = -1;
-    this.x = -1;
-    this.y = -1;
+    this.x = -1; // center x
+    this.y = -1; // center y
     this.size = -1;
     this.dx = 0;
     this.dy = 0;
+    this.myCells = [];
   };
   this.reset();
 
@@ -108,32 +109,13 @@ AgarClient.prototype.handleMessage = function (e) {
     for (var i = 0; i < cnt; ++i) {
       var attacker_id = dv.getUint32(), victim_id = dv.getUint32();
 
-      if (attacker_id in objects) {
+      if (objects[attacker_id]) {
         var attacker = objects[attacker_id];
 //        window.dump("eat\t"+attacker.size+"\t"+victim.size+
         //                    "\t"+pos_a.distance(pos_v)+"\n");
         attacker.lastEatTime = t;
         attacker.hasntEatenSinceLastDecay = false;
         attacker.prevEatSize = attacker.size;
-      }
-
-      if (attacker_id in objects) {
-        attacker = objects[attacker_id];
-        attacker.lastEatTime = t;
-        attacker.hasntEatenSinceLastDecay = false;
-      }
-
-      if (victim_id == this.id) {
-        this.reset();
-        setTimeout(this.sendNick.bind(this), 500);
-      }
-
-      if (victim_id == GCid) {
-        GCid = -1;
-      }
-
-      if (victim_id in names) {
-        delete names[victim_id];
       }
 
       delete objects[victim_id];
@@ -164,14 +146,11 @@ AgarClient.prototype.handleMessage = function (e) {
 
       var name = dv.getNullString16();
 
-      if (name !== "") {
-        names[id] = name;
-      }
-
       var o;
-      if (id in objects) {
+      if (objects[id]) {
         o = objects[id];
-
+        o.x = x;
+        o.y = y;
         // detect movement without gain in size and only do it on
         // ourselves to keep the data free of split events
 //         if (o.size == size && (t - o.lastUpdate) < 500 && id == this.id) {
@@ -179,12 +158,12 @@ AgarClient.prototype.handleMessage = function (e) {
 //                       (Victor.fromObject(o).distance(new Victor(x, y)))
 //                       + "\t" + (t - o.lastUpdate) + "\n");
 //        }
-        if (id in names) {
-          o.name = names[id];
-        }
       } else {
+        // create
         objects[id] = {
           name: name,
+          x: x,
+          y: y,
           lastEatTime: 0,
           lastDecayTime: 0,
           hasntEatenSinceLastDecay: false,
@@ -202,6 +181,7 @@ AgarClient.prototype.handleMessage = function (e) {
       if (size < o.size) {
         var decayPoint = new Victor(x, y);
 
+        /*
         if (o.prevDecayPoint !== null) {
           window.dump(
             (t-o.lastDecayTime) + "\t" +
@@ -214,6 +194,7 @@ AgarClient.prototype.handleMessage = function (e) {
               (decayPoint.distance(o.prevDecayPoint)) + "\n"
           );
         }
+        */
 
         o.lastDecayTime = t;
         o.hasntEatenSinceLastDecay = true;
@@ -236,26 +217,36 @@ AgarClient.prototype.handleMessage = function (e) {
       }
 
       o.lastUpdate = t;
-
-      if (id == this.id) {
-        this.x = x;
-        this.y = y;
-        this.size = size;
-        objects[id].name = this.nickname;
-
-	/* trying to add some background movement/parallax */
-	var bgx = (this.world.width)-x;
-	var bgy = (this.world.height)-y;
-	document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
-
-      }
     }
 
+    // Calcualate center
+    var cx = 0, cy = 0, count = 0;
+    for (var i in this.myCells) {
+      var j = this.myCells[i];
+      if (objects[j]) {
+        cx += objects[j].x;
+        cy += objects[j].y;
+        count++;
+      } else {
+        delete this.myCells[i];
+      }
+    }
+    if (count != 0) {
+      this.x = cx/count;
+      this.y = cy/count;
+      /* trying to add some background movement/parallax */
+      var bgx = (this.world.width)-this.x;
+      var bgy = (this.world.height)-this.y;
+      document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
+    }
+    
+        
+    // Remove    
     cnt = dv.getUint32();
     for (i = 0; i < cnt; i++) {
       var killid = dv.getUint32();
-      if (killid in objects) {
-        if (killid == GCid) { GCid = -1; }
+      if (objects[killid]) {
+        //if (killid == GCid) { GCid = -1; }
         delete objects[killid];
       }
     }
@@ -280,7 +271,8 @@ AgarClient.prototype.handleMessage = function (e) {
   case 32:
     // New object under our control... but I don't handle controlling
     // multiple blobs yet
-    this.id = dv.getUint32();
+    var id = dv.getUint32();
+    this.myCells.push(id);
     break;
 
   case 49:
