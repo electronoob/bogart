@@ -242,6 +242,12 @@ AgarClient.prototype.handleMessage = function (e) {
         this.y = y;
         this.size = size;
         objects[id].name = this.nickname;
+
+	/* trying to add some background movement/parallax */
+	var bgx = (this.world.width)-x;
+	var bgy = (this.world.height)-y;
+	document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
+
       }
     }
 
@@ -309,6 +315,11 @@ AgarClient.prototype.handleMessage = function (e) {
     this.world.width = w;
     this.world.height = h;
     console.log("World dimensions [64]", x, y, w, h);
+
+        var bgx = (this.world.width)-x;
+        var bgy = (this.world.height)-y;
+        document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
+
     break;
 
   case 72:

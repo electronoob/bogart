@@ -9,7 +9,7 @@ var NUM_BOTS = 1;
 var clients = [], spec = null;
 
 var offsetX = 0, offsetY = 0;
-var scale_x = .5, scale_y = .5;
+var scale_x = 4, scale_y = 4;
 
 var FEED_TARGETS = ["gc", "BotMaster", "white light", "white  light",
                     "tubbymcfatfuck", "texas  doge", "white  light",
@@ -37,7 +37,7 @@ function canvasResizeHandler() {
 var inter=null;
 function start() {
   //window.dump("decay_time\teat_time\told_size\tnew_size\tprev_decay_size\tprev_eat_size\tgood_decay\tdist_moved\n");
-  spec = new AgarClient("spectatorbot", world, false);
+  spec = new AgarClient($("#name").val(), world, false);
 
   window.onmousemove=function(e){
     window.spec.dx = (e.clientX / scale_x) - offsetX;
@@ -302,6 +302,8 @@ if (typeof window !== "undefined") {
     $("#open").click(function () {
       world.url = $("#url").val();
       $("#url").hide();
+$(".bogart").hide(50);	
+	$("#form-main").hide(200);
       $("#open").hide();
       $("#close").show();
       start();
