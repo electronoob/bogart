@@ -44,6 +44,20 @@ function start() {
     window.spec.dy = (e.clientY / scale_y) - offsetY;
     //console.log(spec.dx+ " : " + spec.dy);
   };
+  window.onkeypress = function(e){
+    var x = e.which || e.keyCode;
+    switch(x) {
+      case 119: // W
+        spec.sendCommand(21);
+        break;
+      case 32: // Space
+        spec.sendCommand(17);
+        break;
+      case 113: // Q
+        spec.sendCommand(18);
+        break;
+    }
+  }
   // Zoom
   window.onmousewheel=function(e){
       var d = e.wheelDelta/2000;
