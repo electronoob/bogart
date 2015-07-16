@@ -6,6 +6,7 @@ font-family: 'Chewy', cursive;
 font-size: 80px;
 text-align:center;
 color: #ffffff;
+    text-shadow: 2px 2px #ff0000;
 }
 #feedback-page{
 	text-align:center;
