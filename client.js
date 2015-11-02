@@ -67,12 +67,12 @@ AgarClient.prototype.sendNick = function () {
 };
 
 AgarClient.prototype.sendDirection = function () {
-  var buf = new ArrayBuffer(21),
+  var buf = new ArrayBuffer(13),
       dv = new DVWriter(new DataView(buf), true);
 
   dv.putUint8(16);
-  dv.putFloat64(this.dx, true);
-  dv.putFloat64(this.dy, true);
+  dv.putInt32(this.dx, true);
+  dv.putInt32(this.dy, true);
   dv.putUint32(0, true);
 
   this.socket.send(buf);
@@ -130,9 +130,9 @@ AgarClient.prototype.handleMessage = function (e) {
       var id = dv.getUint32();
       if (id == 0) break;
 
-      var x = dv.getInt16(),
-          y = dv.getInt16(),
-          size = dv.getInt16(),
+      var x = dv.getInt32(),
+          y = dv.getInt32(),
+          size = dv.getUint16(),
           r = dv.getUint8(),
           g = dv.getUint8(),
           b = dv.getUint8(),
