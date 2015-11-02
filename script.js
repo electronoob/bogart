@@ -240,18 +240,11 @@ function render() {
       ctx.arc(x, y, o.size, 0, 2*Math.PI);
       ctx.stroke();
 
-      if (o.isAgitated) {
-        ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-        ctx.fill();
-      } else if (o.isBot) {
-        ctx.fillStyle = "rgba(0, 0, 255, 0.3)";
-        ctx.fill();
-      } else {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.fill();
-      }
-
+      ctx.globalAlpha = 0.5;
       ctx.fillStyle = o.color;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+
       if (id == GCid) {
         ctx.font = 'bold 20pt Calibri';
       } else {
@@ -262,18 +255,13 @@ function render() {
 
       if (o.size > 20 || o.name !== "") {
         ctx.font = "6pt Sans Serif";
-        size = ctx.measureText("" + o.size);
-        ctx.fillText(""+o.size, x-(size.width / 2), y+6);
+        var mass = (o.size * o.size)/100 >> 0;
+        size = ctx.measureText("" + mass);
+        ctx.fillText(""+mass, x-(size.width / 2), y+6);
 
         d = (t - o.lastEatTime).toFixed(2);
         size = ctx.measureText(d);
         ctx.fillText(d, x-(size.width / 2), y+12);
-      }
-
-      if (o.feed_target) {
-        ctx.font = "20pt Sans Serif";
-        size = ctx.measureText("FEED");
-        ctx.fillText("FEED", x-(size.width / 2), y+12);
       }
     }
   }

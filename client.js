@@ -118,9 +118,8 @@ AgarClient.prototype.handleMessage = function (e) {
         attacker.prevEatSize = attacker.size;
       }
 
-      var index = this.myCells.indexOf(victim_id);
-      if (index != -1) {
-        delete this.myCells[index];
+      if (this.myCells[victim_id]) {
+        delete this.myCells[victim_id];
       }
 
       delete objects[victim_id];
@@ -183,10 +182,10 @@ AgarClient.prototype.handleMessage = function (e) {
       // This blob got smaller: gotta be either decay or a split--I
       // want the split data to and I'll filter out large losses of
       // half at a time in post
+      /*
       if (size < o.size) {
         var decayPoint = new Victor(x, y);
 
-        /*
         if (o.prevDecayPoint !== null) {
           window.dump(
             (t-o.lastDecayTime) + "\t" +
@@ -199,15 +198,15 @@ AgarClient.prototype.handleMessage = function (e) {
               (decayPoint.distance(o.prevDecayPoint)) + "\n"
           );
         }
-        */
 
         o.lastDecayTime = t;
         o.hasntEatenSinceLastDecay = true;
         o.prevDecaySize = size;
         o.prevDecayPoint = new Victor(x, y);
+        
       }
+      */
 
-      o.isBot = o.isBot || (id == this.id);
       o.x = x;
       o.y = y;
       o.size = size;
@@ -215,22 +214,15 @@ AgarClient.prototype.handleMessage = function (e) {
       o.isAgitated = isAgitated;
       o.color = color;
 
-      if (name !== "") {
-        o.feed_target = FEED_TARGETS.some(function (n) {
-          return name.toLowerCase() === n;
-        });
-      }
-
       o.lastUpdate = t;
     }
 
     // Calcualate center
     var cx = 0, cy = 0, count = 0;
     for (var i in this.myCells) {
-      var j = this.myCells[i];
-      if (objects[j]) {
-        cx += objects[j].x;
-        cy += objects[j].y;
+      if (objects[i]) {
+        cx += objects[i].x;
+        cy += objects[i].y;
         count++;
       } 
       /*
@@ -280,7 +272,7 @@ AgarClient.prototype.handleMessage = function (e) {
     // New object under our control... but I don't handle controlling
     // multiple blobs yet
     var id = dv.getUint32();
-    this.myCells.push(id);
+    this.myCells[id] = true;
     break;
 
   case 49:
