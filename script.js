@@ -86,8 +86,7 @@ function render(t) {
     if (count != 0) {
       spec.x = cx/count;
       spec.y = cy/count;
-      /* trying to add some background movement/parallax */
-      /*
+      /* trying to add some background movement/parallax
       var bgx = (world.width) - (spec.x * window.scale_x);
       var bgy = (world.height) - (spec.y * window.scale_y);
       document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
@@ -109,9 +108,11 @@ function render(t) {
       o.draw(ctx);
 
       // Animation smoothing
-      o.x += (o.x_ - o.x) / 4.0;
-      o.y += (o.y_ - o.y) / 4.0;
-      o.size += (o.size_ - o.size) / 6.0;
+      if (o.animate) {
+        o.x += (o.x_ - o.x) / 4.0;
+        o.y += (o.y_ - o.y) / 4.0;
+        o.size += (o.size_ - o.size) / 6.0;
+      }
     }
   }
 

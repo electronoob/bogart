@@ -154,6 +154,7 @@ AgarClient.prototype.handleMessage = function (e) {
         o.x_ = x; 
         o.y_ = y;
         o.size_ = size;
+        o.animate = true;
       } else {
         // create
         objects[id] = {
@@ -164,6 +165,7 @@ AgarClient.prototype.handleMessage = function (e) {
           x: x,
           y: y,
           size: size,
+          animate: false,
         };
 
         // Set drawing functions
