@@ -71,10 +71,30 @@ function render(t) {
   // Zooming in
   ctx.scale(scale_x,scale_y);
 
-  var d;
-
-  // Translate
   if (spec) {
+    // Calcualate center
+    var cx = 0, cy = 0, count = 0;
+    for (var i in spec.myCells) {
+      if (world.objects[i]) {
+        cx += world.objects[i].x;
+        cy += world.objects[i].y;
+        count++;
+      } 
+    }
+
+    // Caculate center if the player is alive
+    if (count != 0) {
+      spec.x = cx/count;
+      spec.y = cy/count;
+      /* trying to add some background movement/parallax */
+      /*
+      var bgx = (world.width) - (spec.x * window.scale_x);
+      var bgy = (world.height) - (spec.y * window.scale_y);
+      document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
+      */
+    }
+
+    // Translate canvas
     offsetX = ((width/2) / scale_x) - spec.x; 
     offsetY = ((height/2) / scale_y) - spec.y;
     ctx.translate(offsetX,offsetY);
@@ -84,67 +104,14 @@ function render(t) {
   for (var id in objects) {
     if (objects.hasOwnProperty(id)) {
       var o = objects[id];
+
+      // Draw
       o.draw(ctx);
-      /*
-      var x = o.x;
-      var y = o.y;
 
-      if (o.isVirus) {
-        ctx.setLineDash([5,5]);
-        // Virus outline
-        ctx.beginPath();
-        ctx.strokeStyle = o.color;
-        ctx.arc(x, y, o.size, 0, 2*Math.PI);
-        ctx.stroke();
-        // Virus color
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = o.color;
-        ctx.fill();
-      } else {
-        ctx.setLineDash([]);
-
-        // Begin circle outline
-        ctx.beginPath();
-        ctx.strokeStyle = o.color;
-        ctx.lineWidth = 5; // Test
-        ctx.arc(x, y, o.size, 0, 2*Math.PI);
-        
-        // Draw white cell background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fill();
-
-        // Draw cell color over the white background
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = o.color;
-        ctx.fill();
-
-        // Reset Alpha
-        ctx.globalAlpha = 1.0;
-        
-        // Draw Outline
-        ctx.stroke();
-      }
-      
-      // Draw name/mass
-      if (o.size > 20 && !o.isVirus) {
-        // Height variable
-        var h = 0;
-        ctx.fillStyle = '#FFFFFF';
-
-        // Draw name
-        if (o.name.length > 0) {
-          h = Math.max(.5 * o.size,20); // name size
-          ctx.font = 'bold ' + h + 'pt Calibri';
-          ctx.fillText(o.name, x-(ctx.measureText(o.name).width / 2), y + (h/4));
-        }
-        
-        // Draw mass
-        var fh = Math.max(h/2,10); // font height
-        ctx.font = fh + 'pt Sans Serif';
-        var mass = '' + ((o.size * o.size)/100 >> 0);
-        ctx.fillText(mass, x-(ctx.measureText(mass).width / 2), y + fh + (h/3));
-      }
-      */
+      // Animation smoothing
+      o.x += (o.x_ - o.x) / 4.0;
+      o.y += (o.y_ - o.y) / 4.0;
+      o.size += (o.size_ - o.size) / 6.0;
     }
   }
 

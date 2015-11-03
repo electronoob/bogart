@@ -151,39 +151,42 @@ AgarClient.prototype.handleMessage = function (e) {
       var o;
       if (objects[id]) {
         o = objects[id];
-        o.x = x;
-        o.y = y;
+        o.x_ = x; 
+        o.y_ = y;
+        o.size_ = size;
       } else {
         // create
         objects[id] = {
           name: name,
+          x_: x, // Real X
+          y_: y, // Real Y
+          size_: size, // Real size
           x: x,
           y: y,
+          size: size,
         };
+
+        // Set drawing functions
+        o = objects[id];
+        if (o.size < 25) {
+          o.draw = drawFood;
+        } else if (isVirus) {
+          o.draw = drawVirus;
+        } else {
+          o.draw = drawPlayer;
+        }
       }
 
       o = objects[id];
-      o.x = x;
-      o.y = y;
-      o.size = size;
       o.isVirus = isVirus;
       o.isAgitated = isAgitated;
       o.color = color;
-
-      // Set drawing functions
-      if (o.size < 25) {
-        o.draw = drawFood;
-      } else if (isVirus) {
-        o.draw = drawVirus;
-      } else {
-        o.draw = drawPlayer;
-      }
-      
 
       o.lastUpdate = t;
     }
 
     // Calcualate center
+    /*
     var cx = 0, cy = 0, count = 0;
     for (var i in this.myCells) {
       if (objects[i]) {
@@ -191,23 +194,18 @@ AgarClient.prototype.handleMessage = function (e) {
         cy += objects[i].y;
         count++;
       } 
-      /*
-      else {
-        delete this.myCells[i];
-      }
-      */
     }
 
     // Caculate center if the player is alive
     if (count != 0) {
       this.x = cx/count;
       this.y = cy/count;
-      /* trying to add some background movement/parallax */
+      // trying to add some background movement/parallax
       var bgx = (this.world.width) - (this.x * window.scale_x);
       var bgy = (this.world.height) - (this.y * window.scale_y);
       document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
     }
-    
+    */
         
     // Remove    
     cnt = dv.getUint32();
