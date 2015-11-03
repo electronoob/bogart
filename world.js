@@ -3,6 +3,7 @@ function AgarWorld(url) {
   this.width = 1;
   this.height = 1;
   this.objects = {};
+  this.sorted = [];
   this.leaders = [];
 };
 

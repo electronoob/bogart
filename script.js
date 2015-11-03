@@ -99,6 +99,7 @@ function render(t) {
     ctx.translate(offsetX,offsetY);
   }
 
+  /*
   var objects = world.objects;
   for (var id in objects) {
     if (objects.hasOwnProperty(id)) {
@@ -113,6 +114,20 @@ function render(t) {
         o.y += (o.y_ - o.y) / 4.0;
         o.size += (o.size_ - o.size) / 6.0;
       }
+    }
+  }
+  */
+  var sorted = world.sorted;
+  for (var i = sorted.length - 1; i > -1; i--) {
+    var o = sorted[i];
+    // Draw
+    o.draw(ctx);
+
+    // Animation smoothing
+    if (o.animate) {
+      o.x += (o.x_ - o.x) / 4.0;
+      o.y += (o.y_ - o.y) / 4.0;
+      o.size += (o.size_ - o.size) / 6.0;
     }
   }
 

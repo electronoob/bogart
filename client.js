@@ -187,28 +187,15 @@ AgarClient.prototype.handleMessage = function (e) {
       o.lastUpdate = t;
     }
 
-    // Calcualate center
-    /*
-    var cx = 0, cy = 0, count = 0;
-    for (var i in this.myCells) {
-      if (objects[i]) {
-        cx += objects[i].x;
-        cy += objects[i].y;
-        count++;
-      } 
-    }
+    // Sort
+    this.world.sorted = []; 
+    for (var key in objects) {
+      this.world.sorted.push(objects[key])
+    };
+    this.world.sorted = this.world.sorted.sort(function(a, b) {
+      return b.size_ - a.size_;
+    });
 
-    // Caculate center if the player is alive
-    if (count != 0) {
-      this.x = cx/count;
-      this.y = cy/count;
-      // trying to add some background movement/parallax
-      var bgx = (this.world.width) - (this.x * window.scale_x);
-      var bgy = (this.world.height) - (this.y * window.scale_y);
-      document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
-    }
-    */
-        
     // Remove    
     cnt = dv.getUint32();
     for (i = 0; i < cnt; i++) {
