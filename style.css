@@ -224,9 +224,14 @@ button#open {
 
 #leaderboard {
   position: absolute;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, .4);
   color: white;
   top:0;
-  right: 0;
-  opacity: 0.5;
+  right: 10px;
+  width:150px;
+  max-width:150px;
+  text-align: center;
+  font-family: Calibri;
+  font-weight: 700;
+  font-size: 24px;
 }
