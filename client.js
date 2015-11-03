@@ -111,8 +111,6 @@ AgarClient.prototype.handleMessage = function (e) {
 
       if (objects[attacker_id]) {
         var attacker = objects[attacker_id];
-//        window.dump("eat\t"+attacker.size+"\t"+victim.size+
-        //                    "\t"+pos_a.distance(pos_v)+"\n");
         attacker.lastEatTime = t;
         attacker.hasntEatenSinceLastDecay = false;
         attacker.prevEatSize = attacker.size;
@@ -155,64 +153,32 @@ AgarClient.prototype.handleMessage = function (e) {
         o = objects[id];
         o.x = x;
         o.y = y;
-        // detect movement without gain in size and only do it on
-        // ourselves to keep the data free of split events
-//         if (o.size == size && (t - o.lastUpdate) < 500 && id == this.id) {
-//           window.dump("" + size + "\t" +
-//                       (Victor.fromObject(o).distance(new Victor(x, y)))
-//                       + "\t" + (t - o.lastUpdate) + "\n");
-//        }
       } else {
         // create
         objects[id] = {
           name: name,
           x: x,
           y: y,
-          lastEatTime: 0,
-          lastDecayTime: 0,
-          hasntEatenSinceLastDecay: false,
-          prevDecaySize: 0,
-          prevEatSize: 0,
-          prevDecayPoint: null
         };
       }
 
       o = objects[id];
-
-      // This blob got smaller: gotta be either decay or a split--I
-      // want the split data to and I'll filter out large losses of
-      // half at a time in post
-      /*
-      if (size < o.size) {
-        var decayPoint = new Victor(x, y);
-
-        if (o.prevDecayPoint !== null) {
-          window.dump(
-            (t-o.lastDecayTime) + "\t" +
-              (t-o.lastEatTime) + "\t" +
-              o.size + "\t" +
-              size + "\t" +
-              o.prevDecaySize + "\t" +
-              o.prevEatSize + "\t" +
-              o.hasntEatenSinceLastDecay.toString().toUpperCase() + "\t" +
-              (decayPoint.distance(o.prevDecayPoint)) + "\n"
-          );
-        }
-
-        o.lastDecayTime = t;
-        o.hasntEatenSinceLastDecay = true;
-        o.prevDecaySize = size;
-        o.prevDecayPoint = new Victor(x, y);
-        
-      }
-      */
-
       o.x = x;
       o.y = y;
       o.size = size;
       o.isVirus = isVirus;
       o.isAgitated = isAgitated;
       o.color = color;
+
+      // Set drawing functions
+      if (o.size < 25) {
+        o.draw = drawFood;
+      } else if (isVirus) {
+        o.draw = drawVirus;
+      } else {
+        o.draw = drawPlayer;
+      }
+      
 
       o.lastUpdate = t;
     }
@@ -231,12 +197,14 @@ AgarClient.prototype.handleMessage = function (e) {
       }
       */
     }
+
+    // Caculate center if the player is alive
     if (count != 0) {
       this.x = cx/count;
       this.y = cy/count;
       /* trying to add some background movement/parallax */
-      var bgx = (this.world.width)-this.x;
-      var bgy = (this.world.height)-this.y;
+      var bgx = (this.world.width) - (this.x * window.scale_x);
+      var bgy = (this.world.height) - (this.y * window.scale_y);
       document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
     }
     
@@ -246,7 +214,6 @@ AgarClient.prototype.handleMessage = function (e) {
     for (i = 0; i < cnt; i++) {
       var killid = dv.getUint32();
       if (objects[killid]) {
-        //if (killid == GCid) { GCid = -1; }
         delete objects[killid];
       }
     }
@@ -322,3 +289,66 @@ AgarClient.prototype.handleMessage = function (e) {
     console.log("Unknown msg", e);
   }
 };
+
+// Drawing functions
+var drawFood = function(ctx) {
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+  ctx.fillStyle = this.color;
+  ctx.fill();
+}
+
+var drawPlayer = function(ctx) {
+  // Begin circle outline
+  ctx.beginPath();
+  ctx.strokeStyle = this.color;
+  ctx.lineWidth = 5; // Test
+  ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
+  
+  // Draw white cell background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+
+  // Draw cell color over the white background
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = this.color;
+  ctx.fill();
+
+  // Reset Alpha
+  ctx.globalAlpha = 1.0;
+  
+  // Draw Outline
+  ctx.stroke();
+  
+  // Draw name
+  var h = 0;
+  ctx.fillStyle = '#FFFFFF';
+  if (this.name.length > 0) {
+    h = Math.max(.5 * this.size,20); // name size
+    ctx.font = 'bold ' + h + 'pt Calibri';
+    ctx.fillText(this.name, this.x-(ctx.measureText(this.name).width / 2), this.y + (h/4));
+  }
+  
+  // Draw mass
+  var fh = Math.max(h/2,10); // font height
+  ctx.font = fh + 'pt Sans Serif';
+  var mass = '' + ((this.size * this.size)/100 >> 0);
+  ctx.fillText(mass, this.x-(ctx.measureText(mass).width / 2), this.y + fh + (h/3));
+}
+
+var drawVirus = function(ctx) {
+  // Line dash
+  ctx.setLineDash([5,5]);
+  // Virus outline
+  ctx.beginPath();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = this.color;
+  ctx.arc(this.x, this.y, this.size, 0, 2*Math.PI);
+  ctx.stroke();
+  // Virus color
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = this.color;
+  ctx.fill();
+  // Done
+  ctx.setLineDash([]);
+}
