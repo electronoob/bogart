@@ -6,7 +6,12 @@ var world = new AgarWorld();
 var spec = null;
 
 var offsetX = 0, offsetY = 0;
-var scale_x = 4, scale_y = 4;
+
+// Scale
+var scale = 0.5, // Rendered Scale 
+    scale_ = 0.5, // Animation
+    scaleReal = 0.5, // Real Scale 
+    scaleZoom = 1; // Zoom multiplier
 
 world.onleaderschange = function (new_leaders) {
   if ($leaderboard) {
@@ -28,8 +33,8 @@ function start() {
   spec = new AgarClient($("#name").val(), world, false);
 
   window.onmousemove=function(e){
-    window.spec.dx = (e.clientX / scale_x) - offsetX;
-    window.spec.dy = (e.clientY / scale_y) - offsetY;
+    window.spec.dx = (e.clientX / scale) - offsetX;
+    window.spec.dy = (e.clientY / scale) - offsetY;
     //console.log(spec.dx+ " : " + spec.dy);
   };
   window.onkeypress = function(e){
@@ -51,9 +56,15 @@ function start() {
   }
   // Zoom
   window.onmousewheel=function(e){
-      var d = e.wheelDelta/2000;
-      scale_x += d;
-      scale_y += d; 
+      // Detect zoom
+      if (e.wheelDelta > 0) {
+        scaleZoom *= 1.1;
+      } else {
+        scaleZoom *= 0.92;
+      }
+
+      // Limits
+      scaleZoom = scaleZoom > 2 ? 2 : (scaleZoom < 0.5 ? 0.5 : scaleZoom);
   };
 }
 
@@ -68,24 +79,36 @@ function render(t) {
   ctx.save();
   ctx.clearRect(0, 0, width, height);
 
-  // Zooming in
-  ctx.scale(scale_x,scale_y);
+  // Animate Scale
+  if (scale_ != scale) {
+    scale += (scale_ - scale) / 20.0;
+  }
+
+  // Set scale
+  ctx.scale(scale,scale);
 
   if (spec) {
     // Calcualate center
-    var cx = 0, cy = 0, count = 0;
+    var cx = 0, cy = 0, size = 0, count = 0;
     for (var i in spec.myCells) {
       if (world.objects[i]) {
-        cx += world.objects[i].x;
-        cy += world.objects[i].y;
+        var o = world.objects[i];
+        cx += o.x;
+        cy += o.y;
+        size += o.size;
         count++;
       } 
     }
 
     // Caculate center if the player is alive
     if (count != 0) {
+      // Get center
       spec.x = cx/count;
       spec.y = cy/count;
+
+      // Set base scale
+      scale_ = Math.pow(Math.min(64.0 / size, 1), 0.4) * Math.max(window.innerHeight / 1080, window.innerWidth / 1920) * scaleZoom;
+
       /* trying to add some background movement/parallax
       var bgx = (world.width) - (spec.x * window.scale_x);
       var bgy = (world.height) - (spec.y * window.scale_y);
@@ -94,8 +117,8 @@ function render(t) {
     }
 
     // Translate canvas
-    offsetX = ((width/2) / scale_x) - spec.x; 
-    offsetY = ((height/2) / scale_y) - spec.y;
+    offsetX = ((width/2) / scale) - spec.x; 
+    offsetY = ((height/2) / scale) - spec.y;
     ctx.translate(offsetX,offsetY);
   }
 
