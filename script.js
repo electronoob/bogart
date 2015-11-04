@@ -155,14 +155,12 @@ if (typeof window !== "undefined") {
 
     $("#open").click(function () {
       world.url = $("#url").val();
-      $("#url").hide();
-$(".bogart").hide(1000);  
-  $("#form-main").hide(500);
-      $("#open").hide();
-      $("#close").show();
+      $(".bogart").hide(1000);  
+      $("#form-main").fadeOut(1000);
       start();
     });
 
+    // On close
     $("#close").click(function () {
       if (spec !== null) {
         spec.end();

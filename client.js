@@ -118,6 +118,12 @@ AgarClient.prototype.handleMessage = function (e) {
 
       if (this.myCells[victim_id]) {
         delete this.myCells[victim_id];
+
+        // Dead
+        if (Object.keys(this.myCells).length == 0) {
+          $(".bogart").show(1000);
+          $("#form-main").fadeIn(1000);
+        }
       }
 
       delete objects[victim_id];
