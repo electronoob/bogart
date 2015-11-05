@@ -7,10 +7,16 @@ var spec = null;
 
 var offsetX = 0, offsetY = 0;
 
+var skins = {
+  "doge":1,
+  "poland":1,
+  "ayy lmao":1,
+  "earth":1,
+};
+
 // Scale
 var scale = 0.5, // Rendered Scale 
     scale_ = 0.5, // Animation
-    scaleReal = 0.5, // Real Scale 
     scaleZoom = 1; // Zoom multiplier
 
 world.onleaderschange = function (new_leaders) {

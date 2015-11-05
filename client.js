@@ -165,6 +165,7 @@ AgarClient.prototype.handleMessage = function (e) {
         // create
         objects[id] = {
           name: name,
+          skinName: checkSkin(name),
           x_: x, // Real X
           y_: y, // Real Y
           size_: size, // Real size
@@ -172,6 +173,8 @@ AgarClient.prototype.handleMessage = function (e) {
           y: y,
           size: size,
           animate: false,
+          color: color,
+          isVirus: isVirus,
         };
 
         // Set drawing functions
@@ -184,13 +187,6 @@ AgarClient.prototype.handleMessage = function (e) {
           o.draw = drawPlayer;
         }
       }
-
-      o = objects[id];
-      o.isVirus = isVirus;
-      o.isAgitated = isAgitated;
-      o.color = color;
-
-      o.lastUpdate = t;
     }
 
     // Sort
@@ -283,6 +279,40 @@ AgarClient.prototype.handleMessage = function (e) {
   }
 };
 
+function checkSkin(name) {
+  // 
+  if (name.length == 0) {
+    return null;
+  }
+
+  // Lower case
+  name = name.toLowerCase();
+
+  // Clan tags
+  var start = name.indexOf('[');
+  if (start != -1) {
+    var end = name.indexOf(']',start);
+    if (end != -1) {
+      name = name.substring(start + 1,end);
+      console.log(name);
+    }
+  }
+
+  // Check if skins exist
+  if (window.skins[name]) {
+    // Get skin name
+    if (window.skins[name] == 1) {
+      // Request skin if image doesnt exist
+      window.skins[name] = new Image();
+      window.skins[name].src = "http://agar.io/skins/" + name + ".png";
+    }
+
+    return name;
+  }
+
+  return null;
+}
+
 // Drawing functions
 var drawFood = function(ctx) {
   ctx.beginPath();
@@ -309,6 +339,13 @@ var drawPlayer = function(ctx) {
 
   // Reset Alpha
   ctx.globalAlpha = 1.0;
+
+  if (this.skinName) {
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(window.skins[this.skinName],this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+    ctx.restore();
+  }
   
   // Draw Outline
   ctx.stroke();
