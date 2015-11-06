@@ -21,9 +21,15 @@ var scale = 0.5, // Rendered Scale
 
 world.onleaderschange = function (new_leaders) {
   if ($leaderboard) {
-    $leaderboard.html("");
+    $leaderboard.html("<p class='leaderboard-header'>Leaderboard</p>");
+
     new_leaders.forEach(function (leader) {
-      $leaderboard.append("<li>" + leader.name + "</li>");
+      if (window.spec.myCells[leader.id]) {
+        $leaderboard.append("<li class='leader'>" + leader.name + "</li>");
+      } else {
+        $leaderboard.append("<li>" + leader.name + "</li>");
+      }
+      
     });
   }
 };

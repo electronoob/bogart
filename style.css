@@ -218,10 +218,19 @@ button#open {
   text-align: center;
   font-family: Calibri;
   font-weight: 700;
-  font-size: 24px;
+  font-size: 22px;
 }
 
+.leaderboard-header {
+  top: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-size: 25px;
+}
 
+.leader {
+  color: red;
+}
 
 
 
