@@ -19,8 +19,10 @@ AgarClient.prototype.reset = function () {
   this.x = -1; // center x
   this.y = -1; // center y
   this.size = -1;
-  this.dx = 0;
-  this.dy = 0;
+  this.mX_ = 0; // Raw mouse X
+  this.mY_ = 0; // Raw mouse Y
+  this.mX = 0; // Actual mouse X on canvas
+  this.mY = 0; // Actual mouse Y on canvas
   this.myCells = [];
 
   // Clear
@@ -63,7 +65,6 @@ AgarClient.prototype.sendInit = function () {
     this.sendCommand(1);
   } else {
     this.sendNick();
-    this.sendDirection();
   }
 
   // 
@@ -80,13 +81,13 @@ AgarClient.prototype.sendNick = function () {
   this.socket.send(buf);
 };
 
-AgarClient.prototype.sendDirection = function () {
+AgarClient.prototype.sendDirection = function (x,y) {
   var buf = new ArrayBuffer(13),
       dv = new DVWriter(new DataView(buf), true);
 
   dv.putUint8(16);
-  dv.putInt32(this.dx, true);
-  dv.putInt32(this.dy, true);
+  dv.putInt32(this.mX, true);
+  dv.putInt32(this.mY, true);
   dv.putUint32(0, true);
 
   this.socket.send(buf);

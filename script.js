@@ -39,9 +39,8 @@ function start() {
   spec = new AgarClient(world, false);
 
   window.onmousemove=function(e){
-    window.spec.dx = (e.clientX / scale) - offsetX;
-    window.spec.dy = (e.clientY / scale) - offsetY;
-    //console.log(spec.dx+ " : " + spec.dy);
+    window.spec.mX_ = e.clientX;
+    window.spec.mY_ = e.clientY;
   };
   window.onkeypress = function(e){
     var x = e.which || e.keyCode;
@@ -144,6 +143,11 @@ function render(t) {
 
   // Send mouse position if socket is connected
   if (spec.isConnected) {
+    // Get mouse positions on canvas
+    spec.mX = (spec.mX_ / scale) - offsetX;
+    spec.mY = (spec.mY_ / scale) - offsetY;
+
+    // Send positions
     spec.sendDirection();
   }
   

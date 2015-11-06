@@ -43,5 +43,5 @@ AgarWorld.prototype.reset = function () {
   this.sorted = [];
 
   // Clear leaderboard
-  this.setLeaders({});
+  this.setLeaders([]);
 };
