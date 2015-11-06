@@ -1,25 +1,36 @@
 var names = {};
 
-function AgarClient(nickname, world, spectate) {
-  var self = this;
-
-  this.nickname = nickname;
+function AgarClient(world, spectate) {
+  this.nickname = "";
   this.world = world;
   this.spectate = spectate;
+  this.socket = null;
+  this.isConnected = false;
 
-  this.reset = function() {
-    this.id = -1;
-    this.x = -1; // center x
-    this.y = -1; // center y
-    this.size = -1;
-    this.dx = 0;
-    this.dy = 0;
-    this.myCells = [];
-  };
   this.reset();
+};
 
-  this.socket = new WebSocket(world.url);
+AgarClient.prototype.reset = function () {
+  //
+  this.isConnected = false;
+
+  //
+  this.id = -1;
+  this.x = -1; // center x
+  this.y = -1; // center y
+  this.size = -1;
+  this.dx = 0;
+  this.dy = 0;
+  this.myCells = [];
+
+  // Clear
+  this.world.reset();
+}
+
+AgarClient.prototype.connect = function (url) {
+  this.socket = new WebSocket(url);
   this.socket.binaryType = "arraybuffer";
+  var self = this;
 
   // Make browser WebSockets and node.js ws library use the same event
   // listener attaching scheme
@@ -34,7 +45,7 @@ function AgarClient(nickname, world, spectate) {
     self.reset();
     console.log("socket error", e);
   });
-};
+}
 
 AgarClient.prototype.sendInit = function () {
   var buf = new ArrayBuffer(5);
@@ -54,6 +65,9 @@ AgarClient.prototype.sendInit = function () {
     this.sendNick();
     this.sendDirection();
   }
+
+  // 
+  this.isConnected = true;
 };
 
 AgarClient.prototype.sendNick = function () {
@@ -88,6 +102,7 @@ AgarClient.prototype.sendCommand = function (x) {
 };
 
 AgarClient.prototype.end = function () {
+  this.reset();
   this.socket.close();
 };
 
@@ -294,7 +309,6 @@ function checkSkin(name) {
     var end = name.indexOf(']',start);
     if (end != -1) {
       name = name.substring(start + 1,end);
-      console.log(name);
     }
   }
 

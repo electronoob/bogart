@@ -36,3 +36,12 @@ AgarWorld.prototype.setLeaders = function (new_leaders) {
     this.onleaderschange(this.leaders);
   }
 };
+
+AgarWorld.prototype.reset = function () {
+  // Clear objects
+  this.objects = {};
+  this.sorted = [];
+
+  // Clear leaderboard
+  this.setLeaders({});
+};

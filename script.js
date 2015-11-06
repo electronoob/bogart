@@ -36,7 +36,7 @@ function canvasResizeHandler() {
 }
 
 function start() {
-  spec = new AgarClient($("#name").val(), world, false);
+  spec = new AgarClient(world, false);
 
   window.onmousemove=function(e){
     window.spec.dx = (e.clientX / scale) - offsetX;
@@ -128,24 +128,6 @@ function render(t) {
     ctx.translate(offsetX,offsetY);
   }
 
-  /*
-  var objects = world.objects;
-  for (var id in objects) {
-    if (objects.hasOwnProperty(id)) {
-      var o = objects[id];
-
-      // Draw
-      o.draw(ctx);
-
-      // Animation smoothing
-      if (o.animate) {
-        o.x += (o.x_ - o.x) / 4.0;
-        o.y += (o.y_ - o.y) / 4.0;
-        o.size += (o.size_ - o.size) / 6.0;
-      }
-    }
-  }
-  */
   var sorted = world.sorted;
   for (var i = sorted.length - 1; i > -1; i--) {
     var o = sorted[i];
@@ -160,12 +142,12 @@ function render(t) {
     }
   }
 
-  // Move this to a function 
-  try {
+  // Send mouse position if socket is connected
+  if (spec.isConnected) {
     spec.sendDirection();
-  } catch (e) {
-    // websocket not open
   }
+  
+  // Restore
   ctx.restore();
 
   window.requestAnimationFrame(render);
@@ -182,18 +164,40 @@ if (typeof window !== "undefined") {
 
     window.requestAnimationFrame(render);
 
+    // Start
+    start();
+
     $("#open").click(function () {
-      world.url = $("#url").val();
+      // Set variables
+      var url = $("#url").val();
+      spec.nickname = $("#name").val();
+
+      if (world.url == url) {
+        // Same server, dont reconnect
+        spec.sendNick();
+      } else {
+        // Different server, lets connect to it
+        if (spec.socket) {
+          // Close any existing connections first
+          spec.end();
+        }
+
+        // Connect
+        spec.connect(url);
+
+        // Finish
+        world.url = url;
+      }
+
+      // Close menu
       $(".bogart").hide(1000);  
       $("#form-main").fadeOut(1000);
-      start();
     });
 
     // On close
     $("#close").click(function () {
       if (spec !== null) {
         spec.end();
-        spec = false;
       }
 
       $("#url").show();
