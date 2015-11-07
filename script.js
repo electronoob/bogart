@@ -48,20 +48,21 @@ function start() {
     window.spec.mX_ = e.clientX;
     window.spec.mY_ = e.clientY;
   };
-  window.onkeypress = function(e){
+  window.onkeydown = function(e){
     var x = e.which || e.keyCode;
     switch(x) {
-      case 119: // W
+      case 87: // W
         spec.sendCommand(21);
         break;
       case 32: // Space
         spec.sendCommand(17);
         break;
-      case 113: // Q
+      case 81: // Q
         spec.sendCommand(18);
         break;
-      case 114: // R = respawn
-        spec.sendNick();
+      case 27: // Esc
+        $(".bogart").toggle(1000);  
+        $("#form-main").fadeToggle(1000);
         break;
     }
   }
