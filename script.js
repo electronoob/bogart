@@ -16,7 +16,7 @@ var skins = {
 
 var settings = {
   hideNames: false,
-  showMass: false,
+  hideMass: false,
   hideSkins: false,
   hideLeader: false,
 };
@@ -89,8 +89,8 @@ function start() {
   $('#settings-title').on('mousedown', null, function() {
       $('#form-settings').addClass('draggable').on('mousemove', function(e) {
           $('.draggable').offset({
-              top: e.pageY - $('.draggable').outerHeight() / 2,
-              left: e.pageX - $('.draggable').outerWidth() / 2
+              top: e.pageY - $('#settings-title').outerHeight() / 2,
+              left: e.pageX - $('#settings-title').outerWidth() / 2
           }).on('mouseup', function() {
               $('#form-settings').removeClass('draggable');
           });
@@ -98,6 +98,24 @@ function start() {
       e.preventDefault();
   }).on('mouseup', function() {
       $('.draggable').removeClass('draggable');
+  });
+  // Checkbox
+  $('#hideNames').change(function() {
+    settings[$(this).val()] = $(this).prop('checked');
+  });
+  $('#hideMass').change(function() {
+    settings[$(this).val()] = $(this).prop('checked');
+  });
+  $('#hideSkins').change(function() {
+    settings[$(this).val()] = $(this).prop('checked');
+  });
+  $('#hideLeader').change(function() {
+    settings[$(this).val()] = $(this).prop('checked');
+    if (settings.hideLeader) {
+      $leaderboard.css('display', 'none');
+    } else {
+      $leaderboard.css('display', 'block');
+    }
   });
 }
 

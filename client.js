@@ -180,6 +180,7 @@ AgarClient.prototype.handleMessage = function (e) {
       } else {
         // create
         objects[id] = {
+          id: id,
           name: name,
           skinName: checkSkin(name),
           x_: x, // Real X
@@ -355,7 +356,7 @@ var drawPlayer = function(ctx) {
   // Reset Alpha
   ctx.globalAlpha = 1.0;
 
-  if (this.skinName) {
+  if (this.skinName && !window.settings.hideSkins) {
     ctx.save();
     ctx.clip();
     ctx.drawImage(window.skins[this.skinName],this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
@@ -368,17 +369,19 @@ var drawPlayer = function(ctx) {
   // Draw name
   var h = 0;
   ctx.fillStyle = '#FFFFFF';
-  if (this.name.length > 0) {
+  if (this.name.length > 0 && !window.settings.hideNames) {
     h = Math.max(.5 * this.size,20); // name size
     ctx.font = 'bold ' + h + 'pt Calibri';
     ctx.fillText(this.name, this.x-(ctx.measureText(this.name).width / 2), this.y + (h/4));
   }
   
   // Draw mass
-  var fh = Math.max(h/2,10); // font height
-  ctx.font = fh + 'pt Sans Serif';
-  var mass = '' + ((this.size * this.size)/100 >> 0);
-  ctx.fillText(mass, this.x-(ctx.measureText(mass).width / 2), this.y + fh + (h/3));
+  if (window.spec.myCells[this.id] && !window.settings.hideMass) {
+    var fh = Math.max(h/2,10); // font height
+    ctx.font = fh + 'pt Sans Serif';
+    var mass = '' + ((this.size * this.size)/100 >> 0);
+    ctx.fillText(mass, this.x-(ctx.measureText(mass).width / 2), this.y + fh + (h/3));
+  }
 }
 
 var drawVirus = function(ctx) {
