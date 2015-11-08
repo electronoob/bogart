@@ -14,6 +14,13 @@ var skins = {
   "earth":1,
 };
 
+var settings = {
+  hideNames: false,
+  showMass: false,
+  hideSkins: false,
+  hideLeader: false,
+};
+
 // Scale
 var scale = 0.5, // Rendered Scale 
     scale_ = 0.5, // Animation
@@ -78,6 +85,20 @@ function start() {
       // Limits
       scaleZoom = scaleZoom > 2 ? 2 : (scaleZoom < 0.5 ? 0.5 : scaleZoom);
   };
+  // Settings
+  $('#settings-title').on('mousedown', null, function() {
+      $('#form-settings').addClass('draggable').on('mousemove', function(e) {
+          $('.draggable').offset({
+              top: e.pageY - $('.draggable').outerHeight() / 2,
+              left: e.pageX - $('.draggable').outerWidth() / 2
+          }).on('mouseup', function() {
+              $('#form-settings').removeClass('draggable');
+          });
+      });
+      e.preventDefault();
+  }).on('mouseup', function() {
+      $('.draggable').removeClass('draggable');
+  });
 }
 
 function drawArrow(ctx, x, y, dx, dy) {
@@ -216,6 +237,11 @@ if (typeof window !== "undefined") {
       $("#close").hide();
       world.objects = {};
       names = {};
+    });
+
+    // 
+    $(".open-settings").click(function () {
+      $("#form-settings").toggle(1000);
     });
   });
 } else {
