@@ -320,7 +320,7 @@ function checkSkin(name) {
     if (window.skins[name] == 1) {
       // Request skin if image doesnt exist
       window.skins[name] = new Image();
-      window.skins[name].src = "http://agar.io/skins/" + name + ".png";
+      window.skins[name].src = "http://skins.agariomods.com/i/" + name + ".png";
     }
 
     return name;
