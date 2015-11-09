@@ -1,5 +1,5 @@
 var width = 100, height = 100;
-var $canvas = null, ctx = null,
+var $canvas = null, ctx = null, mp = null, minimap = null,
     $leaderboard = null;
 
 var world = new AgarWorld();
@@ -19,6 +19,7 @@ var settings = {
   hideMass: false,
   hideSkins: false,
   hideLeader: false,
+  hideMap: false,
 };
 
 // Scale
@@ -46,6 +47,9 @@ function canvasResizeHandler() {
   height = $(window).height();
   $canvas[0].width = width;
   $canvas[0].height = height;
+
+  mp.style.top = (height - 210) + "px";
+  mp.style.left = (width - 210) + "px";
 }
 
 function start() {
@@ -117,6 +121,14 @@ function start() {
       $leaderboard.css('display', 'block');
     }
   });
+  $('#hideMap').change(function() {
+    settings[$(this).val()] = $(this).prop('checked');
+    if (settings.hideMap) {
+      $('#minimap').css('display', 'none');
+    } else {
+      $('#minimap').css('display', 'block');
+    }
+  });
 }
 
 function drawArrow(ctx, x, y, dx, dy) {
@@ -173,6 +185,15 @@ function render(t) {
     ctx.translate(offsetX,offsetY);
   }
 
+  // Minimap
+  if (!settings.hideMap) {
+    minimap.clearRect(0, 0, mp.width, mp.height);
+    minimap.fillStyle = "rgb(0,0,0)";
+    minimap.globalAlpha = .6;
+    minimap.fillRect(0, 0, mp.width, mp.height);
+  }
+
+  // Objects
   var sorted = world.sorted;
   for (var i = sorted.length - 1; i > -1; i--) {
     var o = sorted[i];
@@ -207,6 +228,8 @@ if (typeof window !== "undefined") {
   $(function () {
     $canvas = $("#canvas");
     ctx = $canvas[0].getContext("2d");
+    mp = document.getElementById("minimap");
+    minimap = mp.getContext("2d");
     $(window).resize(canvasResizeHandler);
     canvasResizeHandler();
 

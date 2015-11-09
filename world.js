@@ -5,6 +5,9 @@ function AgarWorld(url) {
   this.objects = {};
   this.sorted = [];
   this.leaders = [];
+
+  this.mapScaleX = 1;
+  this.mapScaleY = 1;
 };
 
 AgarWorld.prototype.insertObject = function (obj) {

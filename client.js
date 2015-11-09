@@ -285,6 +285,9 @@ AgarClient.prototype.handleMessage = function (e) {
         var bgy = (this.world.height)-y;
         document.body.style.backgroundPosition = bgx + "px " + bgy + "px";
 
+    // Minimap
+    this.world.mapScaleX = window.mp.width/(w - x);
+    this.world.mapScaleY = window.mp.height/(h - y);
     break;
 
   case 72:
@@ -365,6 +368,16 @@ var drawPlayer = function(ctx) {
   
   // Draw Outline
   ctx.stroke();
+
+  // Minimap
+  if (!window.settings.hideMap) {
+    var minimap = window.minimap;
+    minimap.beginPath();
+    minimap.strokeStyle = this.color;
+    minimap.arc(this.x * window.world.mapScaleX, this.y * window.world.mapScaleY, this.size * window.world.mapScaleX, 0, 2*Math.PI);
+    minimap.fillStyle = window.spec.myCells[this.id] ? '#FFFFFF' : this.color;
+    minimap.fill();
+  }
   
   // Draw name
   var h = 0;
