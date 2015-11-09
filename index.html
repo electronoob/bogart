@@ -2,11 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8"/>
-    <title>Bogart</title>
+    <title>welcome to cell town</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
-        <script type="text/javascript">
-      // fill in for node js style modules
+    <script type="text/javascript">
       module={};
       exports=module.exports={};
     </script>
@@ -17,50 +16,48 @@
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
+    <div class="mp3player" id="mp3player">
+      <div class="mp3playerposition" id="mp3playerposition"></div>
+      <div class="mp3playeravatar" id="mp3playeravatar"></div>
+      <div class="mp3playerinfo">
+        <div class="mp3playername" id="mp3playername"></div>
+        <div class="mp3playerartist" id="mp3playerartist"></div>
+      </div>
+    </div>
     <canvas id="canvas" width="100" height="100"></canvas>
     <canvas id="minimap" width="200" height="200"></canvas>
     <ol id="leaderboard"></ol>
 
-<center><h1 class="bogart">bogart</h1></center>
-
 <div id="form-main">
   <div id="form-div">
-      <p class="name">
-        <input name="name" type="text" class="feedback-input" placeholder="Name" id="name" value="electro"/>
-      </p>
-      
-           <p class="name">
-        <input type="text"  class="feedback-input" placeholder="ws://server:port" id="url" value="ws://paris.iomods.com:1502/"/>
-      </p>
+  <p class="bogart">Cell Town</p>
 
- 
+      <p class="name">
+        <input name="name" type="text" class="feedback-input" placeholder="Name" id="name" value=""/>
+      </p>
+      <p class="name">
+        <input type="text" style="display:none;" class="feedback-input" placeholder="ws://server:port" id="url" value="ws://paris.iomods.com:1502/"/>
+      </p>
       <div class="submit">
-        <input type="button" value="PLAY BALL" id="open" class="button-blue"/>
+        <input type="button" value="PLAY" id="open" class="button-blue"/>
         <div class="ease"></div>
       </div>
-
+      <p style="color: #ffffff">
+        <small>Welcome to cell town, this is an early access preview so there will be bugs.. Enjoy!</small>
+      </p>
       <div class="form-footer">
-        <a class="open-settings" href="#">Settings</a> - <a href="http://agariomods.com/">agariomods</a>
+        <a class="open-settings" href="#"><img style="width:50px;height:50px;" src="./img/settings.png"/><br/>Settings</a>
       </div>
   </div>
 </div>
-<div class="mp3player" id="mp3player">
-    <div class="mp3playerposition" id="mp3playerposition"></div>
-    <div class="mp3playeravatar" id="mp3playeravatar"></div>
-    <div class="mp3playerinfo">
-        <div class="mp3playername" id="mp3playername"></div>
-        <div class="mp3playerartist" id="mp3playerartist"></div>
-    </div>
-</div>
-
 <div id="form-settings"> 
-  <div id="settings-title">Settings <a class="open-settings" style="float:right;" href="#">X</a></div>
+  <div id="settings-title">Settings <a class="open-settings" style="float:right;" href="#"><img style="opacity:0.5;width:18px;height:18px;background-color:#4444ff;" src="./img/close.svg"/></a></div>
   <div id="settings-body">
-    <input type="checkbox" id="hideNames" name="Hide Names" value="hideNames"> Hide Names<br>
-    <input type="checkbox" id="hideMass" name="Hide Mass" value="hideMass"> Hide Mass<br>
-    <input type="checkbox" id="hideSkins" name="Hide Skins" value="hideSkins"> Hide Skins<br>
-    <input type="checkbox" id="hideLeader" name="Hide Leaderboard" value="hideLeader"> Hide Leaderboard<br>
-    <input type="checkbox" id="hideMap" name="Hide Minimap" value="hideMap"> Hide Minimap<br>
+    <label><input type="checkbox" id="hideNames" name="Hide Names" value="hideNames"> Hide Names<br></label>
+    <label><input type="checkbox" id="hideMass" name="Hide Mass" value="hideMass"> Hide Mass<br></label>
+    <label><input type="checkbox" id="hideSkins" name="Hide Skins" value="hideSkins"> Hide Skins<br></label>
+    <label><input type="checkbox" id="hideMap" name="Hide Minimap" value="hideMap"> Hide Minimap<br></label>
+    <label><input type="checkbox" id="hideLeader" name="Hide Leaderboard" value="hideLeader"> Hide Leaderboard<br></label>
   </div>
 </div>
   </body>

@@ -1,11 +1,14 @@
 @import url(http://fonts.googleapis.com/css?family=Montserrat:400,700);
 @import url(http://fonts.googleapis.com/css?family=Chewy);
 
-h1.bogart {
-font-family: 'Chewy', cursive;
-font-size: 80px;
-text-align:center;
-color: #ffffff;
+p.bogart {
+  text-align: center;
+  font-family: Calibri;
+  font-weight: 700;
+  font-size: 34px;
+  color: #ffffff;
+  max-height: 36px;
+
 }
 #feedback-page{
 	text-align:center;
@@ -15,14 +18,17 @@ color: #ffffff;
 	width:100%;
 	float:left;
 	padding-top:0px;
+  -webkit-box-shadow: 5px 5px 0px 0px rgba(0,0,0,0.52);
+  -moz-box-shadow: 5px 5px 0px 0px rgba(0,0,0,0.52);
+  box-shadow: 5px 5px 0px 0px rgba(0,0,0,0.52);
 }
 
 #form-div {
 	background-color:rgba(72,72,72,0.4);
 	padding-left:35px;
 	padding-right:35px;
-	padding-top:35px;
-	padding-bottom:50px;
+	padding-top:0px;
+	padding-bottom:0px;
 	width: 450px;
 	float: left;
 	left: 50%;
@@ -67,40 +73,20 @@ color: #ffffff;
 
 /* Icons ---------------------------------- */
 #name{
-	background-image: url(http://rexkirby.com/kirbyandson/images/name.svg);
+  background-image: url(./img/name.svg);
 	background-size: 30px 30px;
 	background-position: 11px 8px;
 	background-repeat: no-repeat;
 }
 
 #name:focus{
-	background-image: url(http://rexkirby.com/kirbyandson/images/name.svg);
+	background-image: url(./img/name.svg);
 	background-size: 30px 30px;
 	background-position: 8px 5px;
   background-position: 11px 8px;
 	background-repeat: no-repeat;
 }
 
-#email{
-	background-image: url(http://rexkirby.com/kirbyandson/images/email.svg);
-	background-size: 30px 30px;
-	background-position: 11px 8px;
-	background-repeat: no-repeat;
-}
-
-#email:focus{
-	background-image: url(http://rexkirby.com/kirbyandson/images/email.svg);
-	background-size: 30px 30px;
-  background-position: 11px 8px;
-	background-repeat: no-repeat;
-}
-
-#comment{
-	background-image: url(http://rexkirby.com/kirbyandson/images/comment.svg);
-	background-size: 30px 30px;
-	background-position: 11px 8px;
-	background-repeat: no-repeat;
-}
 
 textarea {
     width: 100%;
@@ -123,8 +109,8 @@ input:focus, textarea:focus {
 	background-color: #3498db;
 	color:white;
 	font-size:24px;
-	padding-top:22px;
-	padding-bottom:22px;
+	padding-top:10px;
+	padding-bottom:10px;
 	-webkit-transition: all 0.3s;
 	-moz-transition: all 0.3s;
 	transition: all 0.3s;
@@ -143,7 +129,7 @@ input:focus, textarea:focus {
 	
 .ease {
 	width: 0px;
-	height: 74px;
+	height: 50px;
 	background-color: #fbfbfb;
 	-webkit-transition: .3s ease;
 	-moz-transition: .3s ease;
@@ -177,7 +163,6 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
-/*background-image: url(102_802tile_background_blackheartsgrey.jpg);*/
  /* fix background */
   background-attachment: fixed;
 
@@ -209,24 +194,25 @@ button#open {
 
 #leaderboard {
   position: absolute;
-  background-color: rgba(0, 0, 0, .4);
+  /*background-color: rgba(0, 0, 0, .4);*/
   color: white;
   top:0;
   right: 10px;
-  width:150px;
-  max-width:150px;
+  width:200px;
+  max-width:200px;
   text-align: center;
   font-family: Calibri;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 14px;
   pointer-events:none ;
+  /*list-style: none;*/
 }
 
 .leaderboard-header {
   top: 0;
   margin-top: 0px;
-  margin-bottom: 0px;
-  font-size: 25px;
+  margin-bottom: 30px;
+  font-size: 14px;
 }
 
 .leader {
@@ -318,9 +304,9 @@ div.mp3player {
 
 .form-footer {
   display: block;
-  padding-top: 25px;
+  padding-bottom: 50px;
   margin: auto;
-  width: 135px;
+  width: 100%;
   height: 30px;
 }
 
@@ -328,24 +314,30 @@ div.mp3player {
   position: inline-block;
   display:none;
   background-color:rgba(72,72,72,0.4);
-  width: 300px;
   position: absolute;
   color: white;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
+  margin: 10px;
+  overflow: hidden;
+  -webkit-box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.52);
+  -moz-box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.52);
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.52);
 }
 
 #settings-title {
   background-color:rgba(72,72,72,0.6);
-  width: 100%;
+  width: calc(100% - 10px);
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   cursor:move;
+  padding-left: 10px;
 }
 
 #settings-body {
   width: 100%;
-  height: 300px;
+  /*height: 300px;*/
+  padding: 10px;
 }
 
 body {
@@ -355,6 +347,7 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
 }
 
 #minimap {
