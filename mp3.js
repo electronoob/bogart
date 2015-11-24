@@ -23,6 +23,7 @@ tracks.push({filename: 'BotB 19127 warinspace.mp3',                             
 	bgmusic.onended = function() {
         mp3player_load_random();
     };
+    bgmusic.volume = 1.0;
     
     function mp3player_load_random() {
         currentTrack = Math.floor(Math.random() * tracks.length);
@@ -30,7 +31,6 @@ tracks.push({filename: 'BotB 19127 warinspace.mp3',                             
         bgmusic.src = "http://skins.agariomods.com/botb/" + track['filename'];
         bgmusic.load();
         bgmusic.loop = false;
-        bgmusic.volume = 1.0;
         mp3player_update_ui(track);
         bgmusic.play();
     }
@@ -100,3 +100,24 @@ tracks.push({filename: 'BotB 19127 warinspace.mp3',                             
             pos.style.background = "linear-gradient(to right, #05abe0 " + aud_pec + "%,#87e0fd " + aud_pec + "%,#87e0fd " + aud_pec + "%)";
         }, 100);
     }
+	
+	var vol = 1;
+	window.addEventListener("keydown", function(e){
+		switch(e.keyCode){
+			case 77:  // M - Mute
+				if(bgmusic.volume){
+					vol = bgmusic.volume;
+					bgmusic.volume = 0;
+				} else bgmusic.volume = vol;
+				break;
+			case 188: // , - Decrement Volume
+				bgmusic.volume = Math.max(bgmusic.volume-.1,.1);
+				break;
+			case 190: // . - Increment Volume
+				bgmusic.volume = Math.min(bgmusic.volume+.1,1);
+				break;
+			case 191: // / - New Track
+				mp3player_load_random()
+				break;
+		}
+	});
