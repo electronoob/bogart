@@ -493,8 +493,8 @@ if(!localStorage.sfxCached){
 			window.localStorage.sfxCached = true;
 		}
 	};
-	//audioRequest.open("GET", "sfx.txt", true);
-	audioRequest.open("GET", "http://kelvin.onl/agario/sfx.txt", true);
+	audioRequest.open("GET", "sfx.csv", true);
+	//audioRequest.open("GET", "http://kelvin.onl/agario/sfx.txt", true);
 	audioRequest.send();
 } else {
 	loadSFX();
