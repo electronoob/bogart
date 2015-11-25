@@ -1081,11 +1081,13 @@ function render(t) {
   }
 
   // Objects
+  var mass = 0;
   var sorted = world.sorted;
   for (var i = sorted.length - 1; i > -1; i--) {
     var o = sorted[i];
     // Draw
-    o.draw(ctx);
+    mass += o.draw(ctx)||0;
+	
 
     // Animation smoothing
     if (o.animate) {
@@ -1094,6 +1096,9 @@ function render(t) {
       o.size += (o.size_ - o.size) / 6.0;
     }
   }
+  
+  // Update Mass Counter
+  document.getElementById("mass").innerHTML = mass;
 
   // Send mouse position if socket is connected
   if (spec.isConnected) {
