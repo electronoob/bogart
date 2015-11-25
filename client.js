@@ -133,7 +133,7 @@ AgarClient.prototype.handleMessage = function (e) {
       }
 
       if (this.myCells[attacker_id]) {
-		  if (this.myCells[victim_id]) playSound("merge");
+		  if (this.myCells[victim_id]) playSound("merge"); else
 		  if (objects[victim_id]){
 			var victim = objects[victim_id];
 			if(victim.size == 10 && victim.name===""){
@@ -145,6 +145,7 @@ AgarClient.prototype.handleMessage = function (e) {
 	  }
 	  
       if (this.myCells[victim_id]) {
+		playSound("eat");
         delete this.myCells[victim_id];
 
         // Dead
@@ -218,7 +219,7 @@ AgarClient.prototype.handleMessage = function (e) {
         }
       }
     }
-
+	
     // Sort
     this.world.sorted = []; 
     for (var key in objects) {
@@ -407,9 +408,10 @@ var drawPlayer = function(ctx) {
   if (window.spec.myCells[this.id] && !window.settings.hideMass) {
     var fh = Math.max(h/2,10); // font height
     ctx.font = fh + 'pt Sans Serif';
-    var mass = '' + ((this.size * this.size)/100 >> 0);
-    ctx.fillText(mass, this.x-(ctx.measureText(mass).width / 2), this.y + fh + (h/3));
+    var mass = ((this.size * this.size)/100 >> 0);
+    ctx.fillText('' + mass, this.x-(ctx.measureText(mass).width / 2), this.y + fh + (h/3));
   }
+  return mass; // For calculating total mass
 }
 
 var drawVirus = function(ctx) {
