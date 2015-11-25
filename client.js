@@ -132,6 +132,18 @@ AgarClient.prototype.handleMessage = function (e) {
         attacker.prevEatSize = attacker.size;
       }
 
+      if (this.myCells[attacker_id]) {
+		  if (this.myCells[victim_id]) playSound("merge");
+		  if (objects[victim_id]){
+			var victim = objects[victim_id];
+			if(victim.size == 10 && victim.name===""){
+				playSound("pellet");
+			} else if (victim.isVirus) {
+				playSound("virushit");
+			} else playSound("eat");
+		  }
+	  }
+	  
       if (this.myCells[victim_id]) {
         delete this.myCells[victim_id];
 
@@ -139,6 +151,7 @@ AgarClient.prototype.handleMessage = function (e) {
         if (Object.keys(this.myCells).length == 0) {
           $(".bogart").show(1000);
           $("#form-main").fadeIn(1000);
+		  playSound("gameover");
         }
       }
 
@@ -245,6 +258,7 @@ AgarClient.prototype.handleMessage = function (e) {
     // New object under our control... but I don't handle controlling
     // multiple blobs yet
     var id = dv.getUint32();
+	if(this.myCells.length == 0)playSound("spawn");
     this.myCells[id] = true;
     break;
 
@@ -264,6 +278,7 @@ AgarClient.prototype.handleMessage = function (e) {
 
   case 50:
     // unknown (like 49 but for teams i'm told)
+	// mevin1 - Leaderboard team mass fractions
     var cnt = dv.getUint32();
     for (var i = 0; i < cnt; ++i) {
       var n = dv.getFloat32();
@@ -412,4 +427,75 @@ var drawVirus = function(ctx) {
   ctx.fill();
   // Done
   ctx.setLineDash([]);
+}
+
+// Sound Effects Stuff
+// Stolen from Agariomods 2.0
+// SFX stored in localstorage because idk
+
+var sounds = ["bounce","eat","gameover","merge","pellet","spawn","split","virusfeed","virushit","virusshoot"];
+
+//Decode audio
+function b64toBlob(b64Data){//, contentType, sliceSize) {
+	var contentType = "audio/ogg";
+    //contentType = contentType || '';
+    var sliceSize = /*sliceSize ||*/ 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return URL.createObjectURL(blob);
+}
+function loadSFX(){
+	var audioUrls = {};
+	for(var i=0;i<sounds.length;i++){
+		var sound = new Audio(b64toBlob(window.localStorage.getItem(sounds[i])));
+		sound.volume = 1;
+        sound.loop = false;
+		sound.onended = function(){
+			this.src = "";
+			jQuery(this).remove();
+		}
+		audioUrls[sounds[i]] = sound;
+	}
+	sounds = audioUrls;
+}
+function playSound(name){
+	if(!sounds.hasOwnProperty(name))return;
+	var sound = sounds[name].cloneNode();
+	sound.play();
+}
+if(!localStorage.sfxCached){
+	var audioRequest = new XMLHttpRequest();
+	audioRequest.onreadystatechange = function() {
+		if (audioRequest.readyState == 4 && audioRequest.status == 200) {
+			var encoding = audioRequest.responseText.split(",");
+			audioRequest.responseText = "";
+			for(var i=0;i<sounds.length;i++){
+				window.localStorage.setItem(sounds[i],encoding[i]);
+				delete encoding[i];
+			}
+			loadSFX();
+			window.localStorage.sfxCached = true;
+		}
+	};
+	//audioRequest.open("GET", "sfx.txt", true);
+	audioRequest.open("GET", "http://kelvin.onl/agario/sfx.txt", true);
+	audioRequest.send();
+} else {
+	loadSFX();
 }
