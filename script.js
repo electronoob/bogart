@@ -920,9 +920,9 @@ world.onleaderschange = function (new_leaders) {
 
     new_leaders.forEach(function (leader) {
       if (window.spec.myCells[leader.id]) {
-        $leaderboard.append("<li class='leader'>" + leader.name + "</li>");
+        $leaderboard.append("<li class='leader'>" + (leader.name||"An Unnamed Cell") + "</li>");
       } else {
-        $leaderboard.append("<li>" + leader.name + "</li>");
+        $leaderboard.append("<li>" + (leader.name||"An Unnamed Cell") + "</li>");
       }
       
     });
@@ -977,7 +977,7 @@ function start() {
       scaleZoom = scaleZoom > 2 ? 2 : (scaleZoom < 0.5 ? 0.5 : scaleZoom);
   };
   // Settings
-  $('#settings-title').on('mousedown', null, function() {
+  $('#settings-title').on('mousedown', null, function(e) {
       $('#form-settings').addClass('draggable').on('mousemove', function(e) {
           $('.draggable').offset({
               top: e.pageY - $('#settings-title').outerHeight() / 2,
