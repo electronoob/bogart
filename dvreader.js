@@ -79,6 +79,17 @@ DVReader.prototype.getNullString16 = function (littleEndian) {
   }
 };
 
+DVReader.prototype.getNullString8 = function (littleEndian) {
+  var str = "", c;
+  while (1) {
+    c = this.getUint8();
+    if (c == 0) {
+      return str;
+    }
+
+    str += String.fromCharCode(c);
+  }
+};
 
 function DVWriter(dv, littleEndian) {
   this.dv = dv;

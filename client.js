@@ -178,8 +178,8 @@ AgarClient.prototype.handleMessage = function (e) {
       var isVirus = !!(flags & 1);
       var isAgitated = !!(flags & 16);
 
-      if (flags & 2) { dv.skip(4); }
-      if (flags & 4) { dv.skip(8); }
+      if (flags & 2) { dv.skip(dv.getUint32()) }
+      if (flags & 4) { dv.getNullString8 }
       if (flags & 8) { dv.skip(16); }
 
       var name = dv.getNullString16();
