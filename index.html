@@ -35,9 +35,31 @@
       <p class="name">
         <input name="name" type="text" class="feedback-input" placeholder="Name" id="name" value=""/>
       </p>
-      <p class="name">
-        <input type="text" style="display:none;" class="feedback-input" placeholder="ws://server:port" id="url" value="ws://paris.iomods.com:1502/"/>
-      </p>
+        <p class="name">
+                <select id="url" name="url" class="feedback-input"></select><br>
+<script>
+document.getElementById('url').value = 'Loading server...';
+$.getJSON( "http://connect.agariomods.com/json/ogar.json", function( s ) {
+var server_count = 0;
+Object.keys(s.games).forEach(function(val,index,arr){
+  s.games[val].forEach(function (val2, index2, arr2) {
+    var option = document.createElement('option');
+    option.text = String(val).replace('.iomods.com','').toUpperCase() + ' - ' + s.games[val][index2]['gamemode'] + '  (' + s.games[val][index2]['current_players'] + '/' + s.games[val][index2]['max_players'] + ')';
+    option.value = 'ws://'+val + ':' + (1501 + index2);
+    option.style.background =  '#33'+(index+5)*2+'44';
+    if(index % 2) { option.style.color =  '#ffffaa'; } else { option.style.color =  '#dddd33'; }
+    if (s.games[val][index2]['current_players'] !== undefined) {
+        document.getElementById('url').add (option,-1);
+      server_count++;
+    }
+  });
+});
+document.getElementById('url').style.padding = '10px';
+
+});
+</script>
+        </p>
+
       <div class="submit">
         <input type="button" value="PLAY" id="open" class="button-blue"/>
         <div class="ease"></div>
