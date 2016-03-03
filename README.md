@@ -1,9 +1,6 @@
 # bogart
 opensource game implementation of awesomeness
 
-demo here
-http://cell.town/
-
 
 based on the original work of gcommer for what was going to be a bot battling system.
 
